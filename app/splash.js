@@ -1,26 +1,84 @@
-import { useEffect, useState } from 'react';
-import FadeInView from '../components/FadeInView';
-import Onboarding1 from './onboarding1';
-import Onboarding2 from './onboarding2';
-import Onboarding3 from './onboarding3';
+// app/Splash.js
+import { useRouter } from 'expo-router';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Splash() {
-  const [screenIndex, setScreenIndex] = useState(0);
-
-  const screens = [<Onboarding1 />, <Onboarding2 />, <Onboarding3 />];
-
-  useEffect(() => {
-    if (screenIndex < screens.length - 1) {
-      const timer = setTimeout(() => {
-        setScreenIndex((prev) => prev + 1);
-      }, 3000); // auto-slide after 3 seconds
-      return () => clearTimeout(timer);
-    }
-  }, [screenIndex]);
+  const router = useRouter();
 
   return (
-    <FadeInView key={screenIndex}>
-      {screens[screenIndex]}
-    </FadeInView>
+    <View style={styles.container}>
+      <Image
+        source={require('../assets/images/leaves.png')}
+        style={styles.leaves}
+      />
+      <Text style={styles.title}>Thrive</Text>
+      <Text style={styles.subtitle}>
+        Thrive a little bit more every day!{'\n'}
+        Growing takes time so take it step by step so you can thrive
+      </Text>
+      <Image
+        source={require('../assets/images/logo.png')}
+        style={styles.logo}
+      />
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push('/SignUpScreen')}
+      >
+        <Image
+          source={require('../assets/images/Next Page Button.png')}
+          style={styles.arrow}
+        />
+      </TouchableOpacity>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#EFD3C5',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: 60,
+    paddingTop: 80,
+    paddingHorizontal: 24,
+  },
+  leaves: {
+    position: 'absolute',
+    top: 40,
+    width: 200,
+    height: 80,
+    resizeMode: 'contain',
+  },
+  title: {
+    marginTop: 120,
+    fontSize: 48,
+    fontFamily: 'LeJourScript',
+    color: '#000',
+  },
+  subtitle: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#333',
+    marginVertical: 16,
+  },
+  logo: {
+    marginBottom: 40,
+    width: 250,
+    height: 250,
+    resizeMode: 'contain',
+  },
+  button: {
+    backgroundColor: '#333',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arrow: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
+  },
+});
