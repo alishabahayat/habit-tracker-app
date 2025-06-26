@@ -5,13 +5,16 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 
-export default function LoginScreen() {
+export default function LoginScreen({
+  onPressLogin,
+  onPressGoToSignUp,
+}) {
   return (
     <View style={styles.container}>
-      {/* Top leaves image */}
+      {/* Top leaves */}
       <Image
         source={require('../assets/images/leaf10.png')}
         style={styles.topImage}
@@ -35,16 +38,19 @@ export default function LoginScreen() {
       />
 
       {/* Login button */}
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={onPressLogin}>
         <Text style={styles.buttonText}>→</Text>
       </TouchableOpacity>
 
-      {/* Bottom text */}
+      {/* Sign-up link */}
       <Text style={styles.bottomText}>
-        Don’t have an account? <Text style={styles.linkText}>Sign up</Text>
+        Don’t have an account?{' '}
+        <Text style={styles.linkText} onPress={onPressGoToSignUp}>
+          Sign up
+        </Text>
       </Text>
 
-      {/* Bottom leaves image */}
+      {/* Bottom leaves */}
       <Image
         source={require('../assets/images/leaves.png')}
         style={styles.bottomImage}

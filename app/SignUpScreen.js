@@ -1,7 +1,5 @@
 // app/SignUpScreen.js
-import { useRouter } from 'expo-router';
 import {
-  Dimensions,
   Image,
   StyleSheet,
   Text,
@@ -10,18 +8,19 @@ import {
   View,
 } from 'react-native';
 
-const { width } = Dimensions.get('window');
-
-export default function SignUpScreen() {
-  const router = useRouter();
-
+export default function SignUpScreen({ onPressSignUp }) {
   return (
     <View style={styles.container}>
+      {/* Top leaves */}
       <Image
         source={require('../assets/images/leaves.png')}
         style={styles.topLeaves}
       />
+
+      {/* Title */}
       <Text style={styles.title}>Create an Account</Text>
+
+      {/* Inputs */}
       <TextInput placeholder="Name" style={styles.input} />
       <TextInput
         placeholder="Email"
@@ -33,12 +32,16 @@ export default function SignUpScreen() {
         style={styles.input}
         secureTextEntry
       />
-      <TouchableOpacity onPress={() => router.replace('/login')}>
+
+      {/* Next button */}
+      <TouchableOpacity onPress={onPressSignUp}>
         <Image
           source={require('../assets/images/Next Page Button.png')}
           style={styles.button}
         />
       </TouchableOpacity>
+
+      {/* Bottom leaf */}
       <Image
         source={require('../assets/images/leaf10.png')}
         style={styles.bottomLeaf}
@@ -67,7 +70,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   input: {
-    width: width * 0.8,     // ← NOW defined
+    width: '80%',       // no more undefined `width`
     height: 45,
     backgroundColor: '#fff',
     borderRadius: 10,
