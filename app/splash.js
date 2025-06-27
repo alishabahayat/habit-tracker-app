@@ -1,11 +1,4 @@
-// app/Splash.js
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Splash({ onPressNext }) {
   return (
@@ -14,19 +7,16 @@ export default function Splash({ onPressNext }) {
         source={require('../assets/images/leaves.png')}
         style={styles.leaves}
       />
-
       <Text style={styles.title}>Thrive</Text>
       <Text style={styles.subtitle}>
         Thrive a little bit more every day!{'\n'}
         Growing takes time so take it step by step so you can thrive
       </Text>
-
       <Image
         source={require('../assets/images/logo.png')}
         style={styles.logo}
       />
 
-      {/* ← Here’s where you hook up the prop instead of router.push */}
       <TouchableOpacity style={styles.button} onPress={onPressNext}>
         <Image
           source={require('../assets/images/Next Page Button.png')}
