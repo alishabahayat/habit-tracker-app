@@ -17,12 +17,7 @@ export default function Splash({ onPressNext }) {
         style={styles.logo}
       />
 
-      <TouchableOpacity style={styles.button} onPress={onPressNext}>
-        <Image
-          source={require('../assets/images/Next Page Button.png')}
-          style={styles.arrow}
-        />
-      </TouchableOpacity>
+
     </View>
   );
 }
@@ -62,17 +57,5 @@ const styles = StyleSheet.create({
     height: 250,
     resizeMode: 'contain',
   },
-  button: {
-    backgroundColor: '#333',
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  arrow: {
-    width: 40,
-    height: 40,
-    resizeMode: 'contain',
-  },
+
 });

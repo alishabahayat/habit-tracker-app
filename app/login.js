@@ -39,7 +39,10 @@ export default function LoginScreen({
 
       {/* Login button */}
       <TouchableOpacity style={styles.button} onPress={onPressLogin}>
-        <Text style={styles.buttonText}>→</Text>
+        <Image
+          source={require('../assets/images/Next Page Button.png')}
+          style={styles.arrow}
+        />
       </TouchableOpacity>
 
       {/* Sign-up link */}
@@ -102,11 +105,17 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#464646',
-    padding: 14,
-    borderRadius: 30,
-    width: 80,
+    width: '100%',
+    height: 50,
+    borderRadius: 10,
     alignItems: 'center',
-    marginTop: 30,
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  arrow: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
   },
   buttonText: {
     fontSize: 24,

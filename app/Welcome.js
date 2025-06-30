@@ -10,7 +10,7 @@ import {
 export default function WelcomeScreen({ onPressNext }) {
   // run the timer as soon as this screen mounts:
   useEffect(() => {
-    const t = setTimeout(onPressNext, 2000); // ← auto‐advance after 2s
+    const t = setTimeout(onPressNext, 1000); // ← auto‐advance after 1s
     return () => clearTimeout(t);
   }, []);
 

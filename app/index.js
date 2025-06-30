@@ -2,11 +2,12 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
-import HomeScreen from './Home'; // <-- your actual home-page component
+import HomeScreen from './Home';
 import LoginScreen from './login';
 import SignUpScreen from './SignUpScreen';
 import Splash from './Splash';
-import WelcomeScreen from './Welcome'; // <-- make sure this file exists!
+import WelcomeScreen from './Welcome';
+import AddHabitScreen from './add-habit';
 
 export default function Index() {
   const [step, setStep] = useState('loading');
@@ -33,7 +34,7 @@ export default function Index() {
   if (step === 'login') {
     return (
       <LoginScreen
-        onPressLogin={() => setStep('signup')}
+        onPressLogin={() => setStep('welcome')}
         onPressGoToSignUp={() => setStep('signup')}
       />
     );
@@ -48,6 +49,10 @@ export default function Index() {
     return <WelcomeScreen onPressNext={() => setStep('home')} />;
   }
 
+  if (step === 'addHabit') {
+    return <AddHabitScreen onPressBack={() => setStep('home')} />;
+  }
+
   // 🎉 Finally land on your real home page
-  return <HomeScreen />;
+  return <HomeScreen onPressAddHabit={() => setStep('addHabit')} />;
 }

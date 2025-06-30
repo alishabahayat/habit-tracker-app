@@ -1,117 +1,340 @@
-// app/HomeScreen.js
+// app/Home.js
 import { useState } from 'react';
 import {
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
-// simple date formatting helper
+// Helper function to format date as "Jul 9"
 function formatDate(d) {
-  const opts = { month: 'short', day: 'numeric' };
-  return d.toLocaleString('en-US', opts);
+  return d.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
-export default function HomeScreen() {
+// Styles
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#96AA9F',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '100%',
+    opacity: 0.1,
+  },
+  appBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'stretch',
+    transform: [{ rotate: '180deg' }, { scale: 1.2 }],
+    opacity: 0.35,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  today: {
+    color: '#4A4A4A',
+    fontSize: 14,
+  },
+  todayActive: {
+    color: '#84AB66',
+  },
+  calendarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  calendar: {
+    width: 24,
+    height: 24,
+  },
+  createBtn: {
+    backgroundColor: '#96AA9F',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    marginLeft: 8,
+  },
+  createIcon: {
+    width: 80,
+    height: 32,
+    resizeMode: 'contain',
+  },
+  greeting: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4A4A4A',
+    textAlign: 'center',
+    marginVertical: 20,
+  },
+  dayScroller: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  arrowButton: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'black',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  arrow: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  arrowIcon: {
+    width: 24,
+    height: 24,
+  },
+  arrowLeft: {
+    transform: [{ rotate: '180deg' }],
+  },
+  dayBoxes: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  dayBox: {
+    width: 60,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  dateBackground: {
+    backgroundColor: '#718278',
+    borderRadius: 8,
+    padding: 8,
+  },
+  selectedBackground: {
+    backgroundColor: '#84AB66',
+    borderRadius: 8,
+    padding: 8,
+  },
+  dateBoxContent: {
+    position: 'relative',
+    zIndex: 1,
+  },
+  dayName: {
+    color: '#4A4A4A',
+    fontSize: 14,
+  },
+  dayNum: {
+    color: '#4A4A4A',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  dayNumActive: {
+    color: '#FFFFFF',
+  },
+  dateText: {
+    color: '#4A4A4A',
+    fontSize: 16,
+  },
+  addEvent: {
+    height: 60,
+    backgroundColor: '#73876ABF',
+    borderRadius: 12,
+    marginHorizontal: 20,
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#84AB66BF',
+    marginLeft: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  plusSign: {
+    fontSize: 24,
+    color: '#D9D9D9',
+    fontWeight: 'bold',
+    lineHeight: 24,
+  },
+  bottomNav: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#96AA9F',
+  },
+  activeTab: {
+    alignItems: 'center',
+    paddingBottom: 8,
+  },
+  activeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#000000',
+    marginTop: 4,
+  },
+  navIcon: {
+    width: 24,
+    height: 24,
+  }
+});
+
+// Home Component
+function Home({ onPressAddHabit }) {
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const goPrevDay = () =>
-    setCurrentDate(d => new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1));
-  const goNextDay = () =>
-    setCurrentDate(d => new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1));
+  const goToday = () => setCurrentDate(new Date());
+  const goToDate = (date) => {
+    setCurrentDate(date);
+    setSelectedDate(date);
+  };
 
-  // For the 7-day scroller:
+  const goPrevDay = () =>
+    setCurrentDate(d =>
+      new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1)
+    );
+
+  const goNextDay = () =>
+    setCurrentDate(d =>
+      new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)
+    );
+
   const days = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date(currentDate);
-    d.setDate(d.getDate() + (i - 3)); // center today at index 3
+    d.setDate(d.getDate() + (i - 3));
     return d;
   });
 
   return (
     <View style={styles.container}>
-      {/* Top decorative background */}
       <Image
         source={require('../assets/images/background image 1.png')}
-        style={styles.topBg}
+        style={styles.backgroundImage}
+      />
+      <Image
+        source={require('../assets/images/background image 2.png')}
+        style={styles.appBorder}
       />
 
-      {/* Header row */}
       <View style={styles.header}>
-        <Text style={styles.today}>Today</Text>
-        <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
-        <Image
-          source={require('../assets/images/calendar.png')}
-          style={styles.calendar}
-        />
-        <TouchableOpacity style={styles.createBtn}>
-          <Image
-            source={require('../assets/images/Create Button.png')}
-            style={styles.createIcon}
-          />
+        <TouchableOpacity onPress={goToday}>
+          <Text style={[
+            styles.today, 
+            selectedDate.toDateString() === new Date().toDateString() 
+              ? styles.todayActive 
+              : null
+          ]}>
+            Today
+          </Text>
         </TouchableOpacity>
+        <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
+        
+        <View style={styles.calendarContainer}>
+          <TouchableOpacity onPress={goToday}>
+            <Image
+              source={require('../assets/images/calendar.png')}
+              style={styles.calendar}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.createBtn}>
+            <Image
+              source={require('../assets/images/Create Button.png')}
+              style={styles.createIcon}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      {/* 7-day scroller */}
+      <Text style={styles.greeting}>Welcome, Charlie</Text>
+
+      {/* 7-Day Scroller */}
       <View style={styles.dayScroller}>
-        <TouchableOpacity onPress={goPrevDay}>
-          <Image
-            source={require('../assets/images/date.png')}
-            style={styles.arrow}
-          />
+        <TouchableOpacity onPress={goPrevDay} style={styles.arrowButton}>
+          <View style={styles.arrow}>
+            <Image
+              source={require('../assets/images/Next Page Button.png')}
+              style={[styles.arrowIcon, styles.arrowLeft]}
+            />
+          </View>
         </TouchableOpacity>
 
-        {days.map((d, idx) => {
-          const isToday =
-            d.toDateString() === new Date().toDateString();
-          return (
-            <View
-              key={idx}
-              style={[
-                styles.dayBox,
-                isToday && styles.dayBoxActive,
-              ]}
-            >
-              <Text style={styles.dayName}>
-                {d.toLocaleString('en-US', { weekday: 'short' })}
-              </Text>
-              <Text
-                style={[
-                  styles.dayNum,
-                  isToday && styles.dayNumActive,
-                ]}
+        <View style={styles.dayBoxes}>
+          {days.map((d, idx) => {
+            const isToday =
+              d.toDateString() === new Date().toDateString();
+            return (
+              <TouchableOpacity 
+                key={idx} 
+                style={styles.dayBox} 
+                onPress={() => goToDate(d)}
               >
-                {d.getDate()}
-              </Text>
-            </View>
-          );
-        })}
+                <View style={
+                  selectedDate.toDateString() === d.toDateString() 
+                    ? styles.selectedBackground 
+                    : styles.dateBackground
+                }>
+                  <View style={styles.dateBoxContent}>
+                    <Text style={styles.dayName}>{d.toLocaleString('en-US', { weekday: 'short' })}</Text>
+                    <Text style={isToday ? [styles.dayNum, styles.dayNumActive] : styles.dayNum}>{d.getDate()}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
 
-        <TouchableOpacity onPress={goNextDay}>
-          <Image
-            source={require('../assets/images/date.png')}
-            style={[styles.arrow, styles.arrowRight]}
-          />
+        <TouchableOpacity onPress={goNextDay} style={styles.arrowButton}>
+          <View style={styles.arrow}>
+            <Image
+              source={require('../assets/images/Next Page Button.png')}
+              style={styles.arrowIcon}
+            />
+          </View>
         </TouchableOpacity>
       </View>
 
       {/* Add Event Button */}
-      <TouchableOpacity style={styles.addEvent}>
-        <Image
-          source={require('../assets/images/Add Event Button.png')}
-          style={styles.addIcon}
-        />
+      <TouchableOpacity style={styles.addEvent} onPress={onPressAddHabit}>
+        <View style={styles.addCircle}>
+          <Text style={styles.plusSign}>+</Text>
+        </View>
       </TouchableOpacity>
 
-      {/* Bottom nav */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity>
+        <View style={styles.activeTab}>
           <Image
             source={require('../assets/images/Home_light.png')}
             style={styles.navIcon}
           />
-        </TouchableOpacity>
+          <View style={styles.activeDot} />
+        </View>
         <TouchableOpacity>
           <Image
             source={require('../assets/images/Favorite_light.png')}
@@ -129,63 +352,4 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#EFD3C5' },
-  topBg: {
-    position: 'absolute',
-    width: '100%',
-    resizeMode: 'cover',
-    top: 0,
-    height: 200, // adjust to your artboard
-  },
-  header: {
-    marginTop: 50,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  today: { fontSize: 16, color: '#718278', flex: 1 },
-  dateText: { fontSize: 20, fontWeight: 'bold', color: '#464646' },
-  calendar: { width: 24, height: 24, marginLeft: 8 },
-  createBtn: { marginLeft: 'auto' },
-  createIcon: { width: 80, height: 32, resizeMode: 'contain' },
-
-  dayScroller: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 20,
-    paddingHorizontal: 10,
-  },
-  arrow: { width: 20, height: 20, tintColor: '#464646' },
-  arrowRight: { transform: [{ rotate: '180deg' }] },
-  dayBox: {
-    marginHorizontal: 4,
-    width: 40,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayBoxActive: {
-    backgroundColor: '#A4F27F',
-    borderRadius: 8,
-  },
-  dayName: { fontSize: 12, color: '#666' },
-  dayNum: { fontSize: 14, color: '#666' },
-  dayNumActive: { color: '#212121', fontWeight: 'bold' },
-
-  addEvent: {
-    position: 'absolute',
-    top: 300,
-    left: 20,
-  },
-  addIcon: { width: 60, height: 60 },
-
-  bottomNav: {
-    position: 'absolute',
-    bottom: 20,
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  navIcon: { width: 24, height: 24 },
-});
+export default Home;
