@@ -8,6 +8,8 @@ import {
   View,
 } from 'react-native';
 
+
+
 // Helper function to format date as "Jul 9"
 function formatDate(d) {
   return d.toLocaleString('en-US', {

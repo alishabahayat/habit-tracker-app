@@ -7,7 +7,7 @@ import {
   View
 } from 'react-native';
 
-export default function WelcomeScreen({ onPressNext }) {
+export default function Welcome({ onPressNext }) {
   // run the timer as soon as this screen mounts:
   useEffect(() => {
     const t = setTimeout(onPressNext, 1000); // ← auto‐advance after 1s

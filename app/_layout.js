@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 export default function Layout() {
   return (
     <Stack
-      initialRouteName="Splash"      // the file Splash.js
+      initialRouteName="Splash"      
       screenOptions={{ headerShown: false }}
     />
   );

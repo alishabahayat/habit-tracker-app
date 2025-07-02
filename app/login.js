@@ -1,63 +1,67 @@
 // app/login.js
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useContext, useEffect } from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
+import { AuthContext } from './_contexts/AuthContext';
+import { initializeDatabase, getUser } from './_helpers/database';
+import { useRouter } from 'expo-router';
 
-export default function LoginScreen({
-  onPressLogin,
-  onPressGoToSignUp,
-}) {
+export default function Login() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const authContext = useContext(AuthContext);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password');
+      return;
+    }
+
+    try {
+      const user = await getUser(email, password);
+      if (user) {
+        authContext.signIn(email, password);
+        router.push('/Home');
+      } else {
+        Alert.alert('Error', 'Invalid email or password');
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* Top leaves */}
-      <Image
-        source={require('../assets/images/leaf10.png')}
-        style={styles.topImage}
-      />
-
-      {/* Title */}
+      <Image source={require('../assets/images/leaves.png')} style={styles.leaves} />
       <Text style={styles.title}>Welcome Back</Text>
-      <Text style={styles.subtitle}>Let’s get back to thriving 🌱</Text>
-
-      {/* Inputs */}
       <TextInput
+        style={styles.input}
         placeholder="Email"
-        placeholderTextColor="#727272"
-        style={styles.input}
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
       <TextInput
-        placeholder="Password"
-        placeholderTextColor="#727272"
-        secureTextEntry
         style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
       />
-
-      {/* Login button */}
-      <TouchableOpacity style={styles.button} onPress={onPressLogin}>
-        <Image
-          source={require('../assets/images/Next Page Button.png')}
-          style={styles.arrow}
-        />
+      <TouchableOpacity style={styles.forgotPassword}>
+        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
       </TouchableOpacity>
-
-      {/* Sign-up link */}
-      <Text style={styles.bottomText}>
-        Don’t have an account?{' '}
-        <Text style={styles.linkText} onPress={onPressGoToSignUp}>
-          Sign up
-        </Text>
-      </Text>
-
-      {/* Bottom leaves */}
-      <Image
-        source={require('../assets/images/leaves.png')}
-        style={styles.bottomImage}
-      />
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <Image source={require('../assets/images/Next Page Button.png')} style={styles.nextButton} />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push('/SignUp')}>
+        <Text style={styles.signUpText}>Don't have an account? Sign up</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -65,57 +69,57 @@ export default function LoginScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#EFD3C5',
+    backgroundColor: '#F5F5F5',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    padding: 20,
   },
-  topImage: {
-    position: 'absolute',
-    top: 0,
+  leaves: {
     width: 200,
-    height: 100,
-    resizeMode: 'contain',
-  },
-  bottomImage: {
-    position: 'absolute',
-    bottom: 0,
-    width: 200,
-    height: 100,
-    resizeMode: 'contain',
+    height: 200,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#464646',
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#464646',
     marginBottom: 30,
   },
   input: {
     width: '100%',
-    backgroundColor: '#fff',
+    height: 50,
+    backgroundColor: 'white',
     borderRadius: 10,
-    padding: 14,
-    marginVertical: 10,
-    color: '#464646',
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  button: {
-    backgroundColor: '#464646',
+  forgotPassword: {
+    alignItems: 'flex-end',
+    marginBottom: 20,
+  },
+  forgotPasswordText: {
+    color: '#333',
+    fontSize: 14,
+  },
+  loginButton: {
     width: '100%',
     height: 50,
+    backgroundColor: '#4CAF50',
     borderRadius: 10,
-    alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  arrow: {
+  nextButton: {
     width: 24,
     height: 24,
-    resizeMode: 'contain',
   },
   buttonText: {
     fontSize: 24,
