@@ -1,17 +1,35 @@
 // app/WelcomeScreen.js
-import { useEffect } from 'react';
+import { useEffect, useContext, useState } from 'react';
 import {
   Image,
   StyleSheet,
   Text,
-  View
+  View,
+  useNavigation
 } from 'react-native';
+import { useRouter } from 'expo-router';
+import { AuthContext } from './_contexts/AuthContext';
 
-export default function Welcome({ onPressNext }) {
-  // run the timer as soon as this screen mounts:
+export default function Welcome() {
+  const router = useRouter();
+  const authContext = useContext(AuthContext);
+  const [isTimeout, setIsTimeout] = useState(false);
+
+  // Navigate to Home when user data is available
   useEffect(() => {
-    const t = setTimeout(onPressNext, 1000); // ← auto‐advance after 1s
-    return () => clearTimeout(t);
+    if (authContext.user && !isTimeout) {
+      router.push('/Home');
+    }
+  }, [authContext.user, isTimeout]);
+
+  // Set timeout to navigate to Home after 1 minute
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsTimeout(true);
+      router.push('/Home');
+    }, 20000); // 20 seconds
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -27,7 +45,9 @@ export default function Welcome({ onPressNext }) {
 
       {/* Middle */}
       <View style={styles.middleSection}>
-        <Text style={styles.title}>Hello Charlie!</Text>
+        <Text style={styles.title}>
+          {authContext.user?.name ? `Hello ${authContext.user.name}!` : 'Welcome!'}
+        </Text>
       </View>
 
       {/* Bottom (button still here if you want a tap fallback) */}
@@ -51,13 +71,8 @@ export default function Welcome({ onPressNext }) {
 }
 
 const styles = StyleSheet.create({
-  container:   { flex: 1, backgroundColor: '#EFD3C5' },
-  topSection:  { flex: 1, alignItems: 'center', justifyContent: 'flex-start', paddingTop: 40 },
-  topLeaves:   { width: 200, height: 80, resizeMode: 'contain' },
-  middleSection:{ flex: 1, alignItems: 'center', justifyContent: 'center' },
+  container:   { flex: 1, backgroundColor: '#EFD3C5', justifyContent: 'center', alignItems: 'center' },
   title:       { fontSize: 32, color: '#464646', fontWeight: 'bold' },
-  bottomSection:{ flex: 1, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 60 },
-  centerLeaves:{ position: 'absolute', width: 300, height: 150, resizeMode: 'contain' },
   //button:      { backgroundColor: '#333', width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center' },
   //arrow:       { width: 40, height: 40, resizeMode: 'contain' },
 });

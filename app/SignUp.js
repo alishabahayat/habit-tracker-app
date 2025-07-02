@@ -20,12 +20,13 @@ const LOGO = require('../assets/images/logo.png');
 export default function SignUp() {
   const router = useRouter();
   const authContext = useContext(AuthContext);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSignUp = async () => {
-    if (!email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -36,7 +37,7 @@ export default function SignUp() {
     }
 
     try {
-      const result = await createUser(email, password);
+      const result = await createUser(name, email, password);
       const userId = result.insertId;
       
       // Store user ID in AsyncStorage
@@ -44,11 +45,11 @@ export default function SignUp() {
       
       // Update auth context
       if (authContext) {
-        authContext.signIn(email, password);
+        authContext.signUp(email, password, name);
+        router.push('/Welcome');
       }
-      
       Alert.alert('Success', 'Account created successfully');
-      router.push('/Home');
+      //router.push('/Home');
     } catch (error) {
       console.error('Sign up error:', error);
       Alert.alert('Error', 'Failed to create account. Please try again.');
@@ -63,10 +64,19 @@ export default function SignUp() {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
+          placeholder="First Name"
+          value={name}
+          onChangeText={setName}
+          autoCapitalize="words"
+          placeholderTextColor="#666666"
+        />
+        <TextInput
+          style={styles.input}
           placeholder="Email"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
+          placeholderTextColor="#666666"
         />
         <TextInput
           style={styles.input}
@@ -74,6 +84,7 @@ export default function SignUp() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          placeholderTextColor="#666666"
         />
         <TextInput
           style={styles.input}
@@ -81,6 +92,7 @@ export default function SignUp() {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
+          placeholderTextColor="#666666"
         />
       </View>
 
@@ -101,7 +113,7 @@ export default function SignUp() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#96AA9F',
+    backgroundColor: '#EFD3C5',
     padding: 20,
     alignItems: 'center',
   },
@@ -113,7 +125,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#F5F0EE',
+    color: '#000000',
     marginTop: 20,
   },
   inputContainer: {
@@ -126,6 +138,8 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     fontSize: 16,
+    color: '#000000',
+
   },
   signUpButton: {
     backgroundColor: '#84AB66',

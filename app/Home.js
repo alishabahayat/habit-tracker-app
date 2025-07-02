@@ -1,11 +1,11 @@
 // app/Home.js
 import { useState } from 'react';
 import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 
@@ -72,6 +72,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 16,
     marginLeft: 8,
+    marginRight: 0,
   },
   createIcon: {
     width: 80,
@@ -88,41 +89,49 @@ const styles = StyleSheet.create({
   dayScroller: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     paddingVertical: 16,
+    backgroundColor: '#718278',
+    borderRadius: 16,
+    overflow: 'hidden',
+    width: '100%',
   },
   arrowButton: {
     width: 40,
     height: 40,
-    backgroundColor: 'black',
+    backgroundColor: '#4A4A4A',
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   arrow: {
-    width: 40,
-    height: 40,
+    width: 24,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
   arrowIcon: {
-    width: 24,
-    height: 24,
+    width: 16,
+    height: 16,
   },
   arrowLeft: {
     transform: [{ rotate: '180deg' }],
   },
   dayBoxes: {
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '80%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
   },
   dayBox: {
-    width: 60,
-    height: 60,
+    width: 48,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
+    marginHorizontal: 4,
   },
   dateBackground: {
     backgroundColor: '#718278',
@@ -140,11 +149,11 @@ const styles = StyleSheet.create({
   },
   dayName: {
     color: '#4A4A4A',
-    fontSize: 14,
+    fontSize: 12,
   },
   dayNum: {
     color: '#4A4A4A',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   dayNumActive: {

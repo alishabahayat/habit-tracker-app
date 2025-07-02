@@ -25,7 +25,7 @@ export default function Login() {
       const user = await getUser(email, password);
       if (user) {
         authContext.signIn(email, password);
-        router.push('/Home');
+        router.push('/Welcome');
       } else {
         Alert.alert('Error', 'Invalid email or password');
       }
@@ -45,6 +45,7 @@ export default function Login() {
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
+        placeholderTextColor="#666666"
       />
       <TextInput
         style={styles.input}
@@ -52,6 +53,7 @@ export default function Login() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        placeholderTextColor="#666666"
       />
       <TouchableOpacity style={styles.forgotPassword}>
         <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
@@ -69,7 +71,7 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#EFD3C5',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
@@ -82,15 +84,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#000000',
     marginBottom: 30,
   },
   input: {
     width: '100%',
-    height: 50,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    paddingHorizontal: 15,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 15,
     marginBottom: 15,
+    fontSize: 16,
+    color: '#000000',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

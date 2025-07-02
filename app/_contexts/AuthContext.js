@@ -15,9 +15,16 @@ export const AuthProvider = ({ children }) => {
     // Initialize user state from AsyncStorage
     const loadUser = async () => {
       try {
+        const usersString = await AsyncStorage.getItem('users') || '[]';
+        const users = JSON.parse(usersString);
+        
+        // Find the user with the stored userId
         const userId = await AsyncStorage.getItem('userId');
         if (userId) {
-          setUser({ id: userId });
+          const user = users.find(u => u.id === userId);
+          if (user) {
+            setUser({ id: user.id, email: user.email, name: user.name });
+          }
         }
       } catch (error) {
         console.error('Error loading user:', error);
@@ -26,11 +33,19 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, []);
 
-  const signUp = async (email, password) => {
+  const signUp = async (email, password, name) => {
     try {
       const userId = Date.now().toString();
-      await AsyncStorage.setItem('userId', userId);
-      setUser({ id: userId, email });
+      
+      // Store user data in AsyncStorage
+      const usersString = await AsyncStorage.getItem('users') || '[]';
+      const users = JSON.parse(usersString);
+      const newUser = { id: userId, email, password, name };
+      users.push(newUser);
+      await AsyncStorage.setItem('users', JSON.stringify(users));
+      
+      // Set user in context
+      setUser({ id: userId, email, name });
       return true;
     } catch (error) {
       console.error('Error signing up:', error);
@@ -40,14 +55,17 @@ export const AuthProvider = ({ children }) => {
 
   const signIn = async (email, password) => {
     try {
-      // Get user ID from AsyncStorage
-      const userId = await AsyncStorage.getItem('userId');
-      if (!userId) {
+      // Get user data from AsyncStorage
+      const usersString = await AsyncStorage.getItem('users') || '[]';
+      const users = JSON.parse(usersString);
+      const user = users.find(u => u.email === email && u.password === password);
+      
+      if (!user) {
         throw new Error('User not found');
       }
       
       // Set user in context
-      setUser({ id: userId, email });
+      setUser({ id: user.id, email: user.email, name: user.name });
       return true;
     } catch (error) {
       console.error('Error signing in:', error);

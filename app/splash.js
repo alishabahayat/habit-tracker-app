@@ -1,7 +1,20 @@
+import React, { useEffect } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Alert } from 'react-native';
 
+export default function Splash() {
+  const router = useRouter();
 
-export default function Splash({ onPressNext }) {
+  useEffect(() => {
+    // Navigate to Login after 3 seconds
+    const timer = setTimeout(() => {
+      router.push('/Login');
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <View style={styles.container}>
       <Image

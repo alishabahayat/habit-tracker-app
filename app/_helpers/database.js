@@ -93,7 +93,7 @@ export const initializeDatabase = async () => {
 
         // Initialize tables
         await database.executeSql(
-          'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, password TEXT)',
+          'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, password TEXT)',
           []
         );
 
@@ -120,21 +120,23 @@ export const initializeDatabase = async () => {
  * @param {string} password
  * @returns Promise resolving to the new user's insertId
  */
-export const createUser = async (email, password) => {
+export const createUser = async (name, email, password) => {
   try {
+    const lowerCaseEmail = email.toLowerCase();
     if (typeof window !== 'undefined') {
       // Web platform - use AsyncStorage
       const usersString = await AsyncStorage.getItem('users') || '[]';
       const users = JSON.parse(usersString);
-      const existingUser = users.find(u => u.email === email);
+      const existingUser = users.find(u => u.email.toLowerCase() === lowerCaseEmail);
       
       if (existingUser) {
         throw new Error('User already exists');
       }
 
       const newUser = {
-        id: Date.now(),
-        email,
+        id: Date.now().toString(),
+        name,
+        email: lowerCaseEmail,
         password
       };
       
@@ -146,10 +148,11 @@ export const createUser = async (email, password) => {
       // Mobile platform - use SQLite
       await database.transaction((tx) => {
         tx.executeSql(
-          'INSERT INTO users (email, password) VALUES (?, ?)',
-          [email, password],
+          'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+          [name, lowerCaseEmail, password],
           (_, result) => {
             console.log('User created successfully:', result);
+            return { insertId: result.insertId };
           },
           (error) => {
             console.error('Error creating user:', error);
@@ -157,7 +160,6 @@ export const createUser = async (email, password) => {
           }
         );
       });
-      return { success: true };
     }
   } catch (error) {
     console.error('Error in createUser:', error);
@@ -173,19 +175,20 @@ export const createUser = async (email, password) => {
  */
 export const getUser = async (email, password) => {
   try {
+    const lowerCaseEmail = email.toLowerCase();
     if (typeof window !== 'undefined') {
       // Web platform - use AsyncStorage
       const usersString = await AsyncStorage.getItem('users') || '[]';
       const users = JSON.parse(usersString);
-      const user = users.find(u => u.email === email && u.password === password);
+      const user = users.find(u => u.email.toLowerCase() === lowerCaseEmail && u.password === password);
       return user || null;
     } else {
       // Mobile platform - use SQLite
       return new Promise((resolve, reject) => {
         database.transaction(tx => {
           tx.executeSql(
-            'SELECT * FROM users WHERE email = ? AND password = ?',
-            [email, password],
+            'SELECT * FROM users WHERE LOWER(email) = ? AND password = ?',
+            [lowerCaseEmail, password],
             (_, { rows }) => {
               resolve(rows.length > 0 ? rows.item(0) : null);
             },
