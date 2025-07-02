@@ -270,20 +270,14 @@ export default function AddHabit() {
     }
 
     try {
-      // Get the user ID (this would be from your local auth state)
-      const authContext = useContext(AuthContext);
+      // Get the user ID from the top-level authContext
       const userId = authContext?.user?.id || 1;
 
       // Add the habit to SQLite
-      await addHabit(userId, emoji, activity, emojiBoxColor);
+      const habitId = await addHabit(userId, emoji, activity, emojiBoxColor);
 
-      Alert.alert('Success', 'Habit added successfully');
-      setActivity('');
-      setEmoji('😀');
-      setColor(COLORS[0]);
-      setEmojiBoxColor(COLORS[0]);
-      setShowEmojiPicker(false);
-      router.back();
+      // Notify Home screen to refresh habits
+      router.replace('Home');
     } catch (error) {
       console.error('Error adding habit:', error);
       Alert.alert('Error', 'Failed to add habit. Please try again.');

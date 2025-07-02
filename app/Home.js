@@ -216,6 +216,34 @@ const styles = StyleSheet.create({
   navIcon: {
     width: 24,
     height: 24,
+  },
+  habitsContainer: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  habitItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  habitEmoji: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  habitText: {
+    fontSize: 16,
+    color: '#333333',
   }
 });
 
@@ -223,7 +251,39 @@ const styles = StyleSheet.create({
 function Home() {
   const router = useRouter();
   const authContext = useContext(AuthContext);
+  const { userId } = authContext.user || {};
   
+  // State for habits
+  const [habits, setHabits] = useState([]);
+
+  // Fetch habits when component mounts and when route changes
+  useEffect(() => {
+    if (userId) {
+      fetchHabits();
+    }
+  }, [userId, router]);
+
+  // Function to fetch habits from database
+  const fetchHabits = async () => {
+    try {
+      console.log('Fetching habits for userId:', userId);
+      
+      // Get all habits from AsyncStorage
+      const allHabits = JSON.parse(await AsyncStorage.getItem('habits') || '[]');
+      console.log('All habits from storage:', allHabits);
+      
+      // Filter habits for current user
+      const userHabits = allHabits.filter(h => h.user_id === userId);
+      console.log('User habits filtered:', userHabits);
+      
+      // Update state
+      setHabits(userHabits);
+      console.log('Habits state updated with:', userHabits);
+    } catch (error) {
+      console.error('Error fetching habits:', error);
+    }
+  };
+
   // Log user state for debugging
   useEffect(() => {
     console.log('User state:', authContext.user);
@@ -294,6 +354,16 @@ function Home() {
       </View>
 
       <Text style={styles.greeting}>Welcome, Charlie</Text>
+
+      {/* Habits List */}
+      <View style={styles.habitsContainer}>
+        {habits.map((habit, index) => (
+          <View key={habit.id} style={[styles.habitItem, { backgroundColor: habit.color }]}>
+            <Text style={styles.habitEmoji}>{habit.emoji}</Text>
+            <Text style={styles.habitText}>{habit.name}</Text>
+          </View>
+        ))}
+      </View>
 
       {/* 7-Day Scroller */}
       <View style={styles.dayScroller}>

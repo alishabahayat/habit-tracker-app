@@ -16,98 +16,54 @@ export default function DatabaseDefault() {
   return null;
 }
 
-// Initialize database based on platform
+// Initialize database
 export const initializeDatabase = async () => {
   try {
-    if (typeof window !== 'undefined') {
-      // Web platform - use localStorage (basic fallback)
-      database = {
-        transaction: (callback) => {
-          callback({
-            objectStore: (storeName) => {
-              return {
-                add: (data) => {
+    // Mobile platform - use AsyncStorage
+    database = {
+      transaction: (callback) => {
+        callback({
+          objectStore: (storeName) => {
+            return {
+              add: async (data) => {
+                try {
                   // Get existing items
-                  const items = JSON.parse(localStorage.getItem(storeName) || '[]');
+                  const items = JSON.parse(await AsyncStorage.getItem(storeName) || '[]');
                   
                   // Add new item
                   items.push(data);
                   
                   // Update storage
-                  localStorage.setItem(storeName, JSON.stringify(items));
-                },
-                get: (id) => {
-                  const items = JSON.parse(localStorage.getItem(storeName) || '[]');
-                  return items.find(item => item.id === id) || null;
-                },
-                getAll: () => {
-                  return JSON.parse(localStorage.getItem(storeName) || '[]');
+                  await AsyncStorage.setItem(storeName, JSON.stringify(items));
+                } catch (error) {
+                  console.error('Error adding item to AsyncStorage:', error);
+                  throw error;
                 }
-              };
-            }
-          });
-        }
-      };
-      console.log('Database initialized successfully (Web - fallback)');
-    } else {
-      // Mobile platform - use SQLite (primary implementation)
-      try {
-        // Check if SQLite is available
-        if (!SQLite || !SQLite.openDatabase) {
-          throw new Error('SQLite is not available in this environment');
-        }
-
-        // Initialize SQLite
-        SQLite.DEBUG(true);
-        SQLite.enablePromise(true);
-
-        // Create database
-        const database_name = 'habit_tracker.db';
-        const database_version = '1.0';
-        const database_displayname = 'Habit Tracker Database';
-        const database_size = 200000;
-
-        database = SQLite.openDatabase(
-          database_name,
-          database_version,
-          database_displayname,
-          database_size,
-          () => {
-            console.log('Database created successfully');
-          },
-          (error) => {
-            console.error('Database error:', error);
-            throw error;
+              },
+              get: async (id) => {
+                try {
+                  const items = JSON.parse(await AsyncStorage.getItem(storeName) || '[]');
+                  return items.find(item => item.id === id) || null;
+                } catch (error) {
+                  console.error('Error getting item from AsyncStorage:', error);
+                  throw error;
+                }
+              },
+              getAll: async () => {
+                try {
+                  return JSON.parse(await AsyncStorage.getItem(storeName) || '[]');
+                } catch (error) {
+                  console.error('Error getting all items from AsyncStorage:', error);
+                  throw error;
+                }
+              }
+            };
           }
-        );
-
-        // Wait for database to be ready
-        await new Promise((resolve, reject) => {
-          const check = setInterval(() => {
-            if (database) {
-              clearInterval(check);
-              resolve();
-            }
-          }, 100);
         });
-
-        // Initialize tables
-        await database.executeSql(
-          'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, password TEXT)',
-          []
-        );
-
-        await database.executeSql(
-          'CREATE TABLE IF NOT EXISTS habits (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, emoji TEXT, activity TEXT, color TEXT, FOREIGN KEY(user_id) REFERENCES users(id))',
-          []
-        );
-
-        console.log('Database initialized successfully (Mobile - primary)');
-      } catch (error) {
-        console.error('SQLite initialization error:', error);
-        throw error;
       }
-    }
+    };
+    console.log('Database initialized successfully (Mobile - AsyncStorage)');
+    return database;
   } catch (error) {
     console.error('Failed to initialize database:', error);
     throw error;
@@ -215,20 +171,30 @@ export const getUser = async (email, password) => {
  */
 export const addHabit = async (userId, emoji, activity, color) => {
   try {
-    return new Promise((resolve, reject) => {
-      database.transaction(tx => {
-        tx.executeSql(
-          'INSERT INTO habits (user_id, emoji, activity, color) VALUES (?, ?, ?, ?)',
-          [userId, emoji, activity, color],
-          (_, { insertId }) => {
-            resolve(insertId);
-          },
-          (_, error) => {
-            reject(error);
-          }
-        );
-      });
-    });
+    console.log('Adding habit with userId:', userId);
+    
+    // Get existing habits
+    const existingHabits = JSON.parse(await AsyncStorage.getItem('habits') || '[]');
+    console.log('Existing habits:', existingHabits);
+    
+    // Create new habit
+    const newHabit = {
+      id: Date.now().toString(),
+      user_id: userId,
+      emoji,
+      name: activity,
+      color
+    };
+    console.log('New habit:', newHabit);
+    
+    // Add to habits array
+    existingHabits.push(newHabit);
+    
+    // Save to AsyncStorage
+    await AsyncStorage.setItem('habits', JSON.stringify(existingHabits));
+    console.log('Updated habits saved to storage:', existingHabits);
+    
+    return newHabit.id;
   } catch (error) {
     console.error('Error adding habit:', error);
     throw error;
