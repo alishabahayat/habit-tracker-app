@@ -64,7 +64,8 @@ export const AuthProvider = ({ children }) => {
         throw new Error('User not found');
       }
       
-      // Set user in context
+      // Store userId and set user in context
+      await AsyncStorage.setItem('userId', user.id);
       setUser({ id: user.id, email: user.email, name: user.name });
       return true;
     } catch (error) {

@@ -24,7 +24,9 @@ export default function Login() {
     try {
       const user = await getUser(email, password);
       if (user) {
-        authContext.signIn(email, password);
+        await authContext.signIn(email, password);
+        // Store the user ID in AsyncStorage
+        await AsyncStorage.setItem('userId', user.id);
         router.push('/Welcome');
       } else {
         Alert.alert('Error', 'Invalid email or password');

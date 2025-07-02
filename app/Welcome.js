@@ -27,7 +27,7 @@ export default function Welcome() {
     const timer = setTimeout(() => {
       setIsTimeout(true);
       router.push('/Home');
-    }, 20000); // 20 seconds
+    }, 3000); // 3 seconds
 
     return () => clearTimeout(timer);
   }, []);

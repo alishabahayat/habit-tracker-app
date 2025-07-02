@@ -12,6 +12,8 @@ import {
   View,
 } from 'react-native';
 import { addHabit } from './_helpers/database';
+import { useRouter } from 'expo-router';
+import { AuthContext } from './_contexts/AuthContext';
 
 // assets
 const X_BUTTON = require('../assets/images/X Button.png');
@@ -46,14 +48,16 @@ const styles = StyleSheet.create({
     right: 0,
     height: 100,
     zIndex: -1,
-    opacity: 0.2,
-    transform: [{ translateY: -50 }], // Move up by half its height
-    width: '100%',
-    overflow: 'visible',
   },
-  centeredContent: {
-    flex: 1,
-    justifyContent: 'center',
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 1,
+  },
+  xButton: {
+    width: 40,
+    height: 40,
     alignItems: 'center',
     width: '100%',
     marginBottom: 120, // Make space for footer
@@ -199,12 +203,33 @@ const styles = StyleSheet.create({
 
 
 
-export default function AddHabit({ onPressBack }) {
-  const [emoji, setEmoji] = useState('😀');
+export default function AddHabit() {
+  const router = useRouter();
+  const authContext = useContext(AuthContext);
   const [activity, setActivity] = useState('');
+  const [emoji, setEmoji] = useState('🎯');
   const [color, setColor] = useState(COLORS[0]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojiBoxColor, setEmojiBoxColor] = useState(COLORS[0]);
+
+  const handleSave = async () => {
+    if (!habitName.trim()) {
+      Alert.alert('Error', 'Please enter a habit name');
+      return;
+    }
+
+    try {
+      await addHabit({
+        name: habitName,
+        emoji: selectedEmoji,
+        color: selectedColor,
+        userId: authContext.user.id,
+      });
+      router.back();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save habit');
+    }
+  };
   const [rainbowColor, setRainbowColor] = useState(null);
 
   const handleBack = () => {
@@ -228,13 +253,13 @@ export default function AddHabit({ onPressBack }) {
           {
             text: 'Discard',
             style: 'destructive',
-            onPress: () => onPressBack()
+            onPress: () => router.back()
           }
         ],
         { cancelable: false }
       );
     } else {
-      onPressBack();
+      router.back();
     }
   };
 
@@ -258,7 +283,7 @@ export default function AddHabit({ onPressBack }) {
       setColor(COLORS[0]);
       setEmojiBoxColor(COLORS[0]);
       setShowEmojiPicker(false);
-      onPressBack();
+      router.back();
     } catch (error) {
       console.error('Error adding habit:', error);
       Alert.alert('Error', 'Failed to add habit. Please try again.');

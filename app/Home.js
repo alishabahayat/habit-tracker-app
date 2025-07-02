@@ -1,5 +1,5 @@
 // app/Home.js
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Image,
     StyleSheet,
@@ -7,6 +7,10 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useContext } from 'react';
+import { AuthContext } from './_contexts/AuthContext';
+import { useLocalSearchParams } from 'expo-router';
 
 
 
@@ -72,7 +76,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 16,
     marginLeft: 8,
-    marginRight: 0,
   },
   createIcon: {
     width: 80,
@@ -217,7 +220,15 @@ const styles = StyleSheet.create({
 });
 
 // Home Component
-function Home({ onPressAddHabit }) {
+function Home() {
+  const router = useRouter();
+  const authContext = useContext(AuthContext);
+  
+  // Log user state for debugging
+  useEffect(() => {
+    console.log('User state:', authContext.user);
+  }, [authContext.user]);
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -271,15 +282,14 @@ function Home({ onPressAddHabit }) {
           <TouchableOpacity onPress={goToday}>
             <Image
               source={require('../assets/images/calendar.png')}
-              style={styles.calendar}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.createBtn}>
-            <Image
-              source={require('../assets/images/Create Button.png')}
               style={styles.createIcon}
             />
           </TouchableOpacity>
+          <TouchableOpacity style={styles.createBtn} onPress={() => {
+         router.push('add-habit');
+       }}>
+        <Image source={require('../assets/images/Create Button.png')} style={styles.createIcon} />
+      </TouchableOpacity>
         </View>
       </View>
 
@@ -332,7 +342,9 @@ function Home({ onPressAddHabit }) {
       </View>
 
       {/* Add Event Button */}
-      <TouchableOpacity style={styles.addEvent} onPress={onPressAddHabit}>
+      <TouchableOpacity style={styles.addEvent} onPress={() => {
+        router.push('add-habit');
+      }}>
         <View style={styles.addCircle}>
           <Text style={styles.plusSign}>+</Text>
         </View>
