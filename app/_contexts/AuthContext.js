@@ -1,29 +1,37 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const AuthContext = createContext({
-  user: null,
-  signIn: () => {},
-  signUp: () => {},
-  signOut: () => {}
-});
+// Initialize AsyncStorage
+const initializeStorage = async () => {
+  try {
+    const users = await AsyncStorage.getItem('users');
+    if (users) {
+      console.log('Users loaded from storage:', users);
+    }
+  } catch (error) {
+    console.error('Error initializing storage:', error);
+  }
+};
+
+// Initialize storage when app starts
+initializeStorage();
+
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
+  // Initialize user state from AsyncStorage
   useEffect(() => {
-    // Initialize user state from AsyncStorage
     const loadUser = async () => {
       try {
-        const usersString = await AsyncStorage.getItem('users') || '[]';
-        const users = JSON.parse(usersString);
-        
-        // Find the user with the stored userId
         const userId = await AsyncStorage.getItem('userId');
         if (userId) {
-          const user = users.find(u => u.id === userId);
-          if (user) {
-            setUser({ id: user.id, email: user.email, name: user.name });
+          const usersString = await AsyncStorage.getItem('users') || '[]';
+          const users = JSON.parse(usersString);
+          const foundUser = users.find(u => u.id === userId);
+          if (foundUser) {
+            setUser({ id: foundUser.id, email: foundUser.email, name: foundUser.name });
           }
         }
       } catch (error) {
@@ -33,44 +41,43 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, []);
 
-  const signUp = async (email, password, name) => {
-    try {
-      const userId = Date.now().toString();
-      
-      // Store user data in AsyncStorage
-      const usersString = await AsyncStorage.getItem('users') || '[]';
-      const users = JSON.parse(usersString);
-      const newUser = { id: userId, email, password, name };
-      users.push(newUser);
-      await AsyncStorage.setItem('users', JSON.stringify(users));
-      
-      // Set user in context
-      setUser({ id: userId, email, name });
-      return true;
-    } catch (error) {
-      console.error('Error signing up:', error);
-      throw error;
-    }
-  };
-
+  // Auth functions
   const signIn = async (email, password) => {
     try {
-      // Get user data from AsyncStorage
       const usersString = await AsyncStorage.getItem('users') || '[]';
       const users = JSON.parse(usersString);
       const user = users.find(u => u.email === email && u.password === password);
       
-      if (!user) {
-        throw new Error('User not found');
+      if (user) {
+        await AsyncStorage.setItem('userId', user.id);
+        setUser({ id: user.id, email: user.email, name: user.name });
+        return true;
       }
-      
-      // Store userId and set user in context
-      await AsyncStorage.setItem('userId', user.id);
-      setUser({ id: user.id, email: user.email, name: user.name });
-      return true;
+      return false;
     } catch (error) {
       console.error('Error signing in:', error);
-      throw error;
+      return false;
+    }
+  };
+
+  const signUp = async (email, password, name) => {
+    try {
+      const usersString = await AsyncStorage.getItem('users') || '[]';
+      const users = JSON.parse(usersString);
+      const newUser = {
+        id: Date.now().toString(),
+        email,
+        password,
+        name
+      };
+      users.push(newUser);
+      await AsyncStorage.setItem('users', JSON.stringify(users));
+      await AsyncStorage.setItem('userId', newUser.id);
+      setUser({ id: newUser.id, email, name });
+      return true;
+    } catch (error) {
+      console.error('Error signing up:', error);
+      return false;
     }
   };
 
@@ -78,19 +85,23 @@ export const AuthProvider = ({ children }) => {
     try {
       await AsyncStorage.removeItem('userId');
       setUser(null);
+      return true;
     } catch (error) {
       console.error('Error signing out:', error);
-      throw error;
+      return false;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Add a default export for Expo Router
-export default AuthProvider;
+
+
 export { AuthContext };
+
+// Default export for Expo Router
+export default AuthProvider;

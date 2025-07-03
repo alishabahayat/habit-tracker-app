@@ -1,5 +1,5 @@
 // app/add-habit.js
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import {
   Alert,
   FlatList,
@@ -14,6 +14,7 @@ import {
 import { addHabit } from './_helpers/database';
 import { useRouter } from 'expo-router';
 import { AuthContext } from './_contexts/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // assets
 const X_BUTTON = require('../assets/images/X Button.png');
@@ -201,36 +202,67 @@ const styles = StyleSheet.create({
   },
 });
 
-
-
 export default function AddHabit() {
   const router = useRouter();
   const authContext = useContext(AuthContext);
+  const { userId } = authContext.user || {};
+
   const [activity, setActivity] = useState('');
-  const [emoji, setEmoji] = useState('🎯');
-  const [color, setColor] = useState(COLORS[0]);
+  const [emoji, setEmoji] = useState('😀');
+  const [color, setColor] = useState('#000000');
+  const [emojiBoxColor, setEmojiBoxColor] = useState('#000000');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [emojiBoxColor, setEmojiBoxColor] = useState(COLORS[0]);
+
+  // Log user state when component mounts
+  useEffect(() => {
+    console.log('AddHabit component mounted with user:', authContext.user);
+  }, [authContext.user]);
+
+  // Log activity changes
+  useEffect(() => {
+    console.log('Activity changed:', activity);
+  }, [activity]);
 
   const handleSave = async () => {
-    if (!habitName.trim()) {
-      Alert.alert('Error', 'Please enter a habit name');
+    if (!activity.trim()) {
+      Alert.alert('Error', 'Please enter an activity name');
       return;
     }
 
     try {
-      await addHabit({
-        name: habitName,
-        emoji: selectedEmoji,
-        color: selectedColor,
-        userId: authContext.user.id,
-      });
-      router.back();
+      console.log('Starting to add habit with userId:', userId);
+      console.log('Current activity:', activity);
+      console.log('Selected emoji:', emoji);
+      console.log('Selected color:', color);
+
+      // Get existing habits
+      const existingHabits = JSON.parse(await AsyncStorage.getItem('habits') || '[]');
+      console.log('Existing habits in storage:', existingHabits);
+
+      // Create new habit
+      const newHabit = {
+        id: Date.now().toString(),
+        user_id: userId,
+        emoji,
+        name: activity,
+        color
+      };
+      console.log('Created new habit:', newHabit);
+
+      // Add to habits array
+      existingHabits.push(newHabit);
+      console.log('Habits array after adding:', existingHabits);
+
+      // Save to AsyncStorage
+      await AsyncStorage.setItem('habits', JSON.stringify(existingHabits));
+      console.log('Habits saved to storage successfully');
+
+      return newHabit.id;
     } catch (error) {
-      Alert.alert('Error', 'Failed to save habit');
+      console.error('Error adding habit:', error);
+      throw error;
     }
   };
-  const [rainbowColor, setRainbowColor] = useState(null);
 
   const handleBack = () => {
     if (activity.trim() !== '') {
@@ -247,7 +279,7 @@ export default function AddHabit() {
             text: 'Save',
             style: 'default',
             onPress: () => {
-              handleAddHabit();
+              handleSave();
             }
           },
           {
@@ -260,27 +292,6 @@ export default function AddHabit() {
       );
     } else {
       router.back();
-    }
-  };
-
-  const handleAddHabit = async () => {
-    if (!activity.trim()) {
-      Alert.alert('Error', 'Please enter an activity name');
-      return;
-    }
-
-    try {
-      // Get the user ID from the top-level authContext
-      const userId = authContext?.user?.id || 1;
-
-      // Add the habit to SQLite
-      const habitId = await addHabit(userId, emoji, activity, emojiBoxColor);
-
-      // Notify Home screen to refresh habits
-      router.replace('Home');
-    } catch (error) {
-      console.error('Error adding habit:', error);
-      Alert.alert('Error', 'Failed to add habit. Please try again.');
     }
   };
 
@@ -384,7 +395,7 @@ export default function AddHabit() {
       </View>
 
       {/* ── ADD BUTTON ────────────────────── */}
-      <TouchableOpacity style={styles.addButton} onPress={handleAddHabit}>
+      <TouchableOpacity style={styles.addButton} onPress={handleSave}>
         <Text style={styles.addButtonText}>Add Activity</Text>
       </TouchableOpacity>
 

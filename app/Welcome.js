@@ -5,8 +5,8 @@ import {
   StyleSheet,
   Text,
   View,
-  useNavigation
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { AuthContext } from './_contexts/AuthContext';
 
@@ -14,19 +14,54 @@ export default function Welcome() {
   const router = useRouter();
   const authContext = useContext(AuthContext);
   const [isTimeout, setIsTimeout] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Navigate to Home when user data is available
+  // Initialize user data and navigate
   useEffect(() => {
-    if (authContext.user && !isTimeout) {
-      router.push('/Home');
-    }
-  }, [authContext.user, isTimeout]);
+    const initializeUser = async () => {
+      try {
+        const usersString = await AsyncStorage.getItem('users') || '[]';
+        const users = JSON.parse(usersString);
+        const userId = await AsyncStorage.getItem('userId');
+        
+        if (userId) {
+          const user = users.find(u => u.id === userId);
+          if (user) {
+            const userData = await authContext.signIn(user.email, user.password);
+            if (userData) {
+              console.log('User initialized:', userData);
+              router.replace('Home');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing user:', error);
+      }
+    };
+    initializeUser();
+  }, []);
 
-  // Set timeout to navigate to Home after 1 minute
+  // Set timeout to navigate to Login after 3 seconds if no user
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsTimeout(true);
-      router.push('/Home');
+    const timer = setTimeout(async () => {
+      try {
+        // Initialize AsyncStorage
+        await AsyncStorage.getItem('users').then(users => {
+          if (users) {
+            console.log('Users loaded from storage:', users);
+          }
+        });
+
+        const userId = await AsyncStorage.getItem('userId');
+        if (!userId) {
+          router.replace('Login');
+        } else {
+          router.replace('Home');
+        }
+      } catch (error) {
+        console.error('Error checking userId:', error);
+        router.replace('Login');
+      }
     }, 3000); // 3 seconds
 
     return () => clearTimeout(timer);
@@ -46,7 +81,7 @@ export default function Welcome() {
       {/* Middle */}
       <View style={styles.middleSection}>
         <Text style={styles.title}>
-          {authContext.user?.name ? `Hello ${authContext.user.name}!` : 'Welcome!'}
+          {authContext.user?.name ? `Welcome, ${authContext.user.name}!` : 'Welcome!'}
         </Text>
       </View>
 

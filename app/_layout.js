@@ -9,12 +9,12 @@ export default function Layout() {
         initialRouteName="Splash"
         screenOptions={{ headerShown: false }}
       >
-      <Stack.Screen name="Splash" options={{ headerShown: false }} />
-      <Stack.Screen name="Login" options={{ headerShown: false }} />
-      <Stack.Screen name="SignUp" options={{ headerShown: false }} />
-      <Stack.Screen name="Welcome" options={{ headerShown: false }} />
-      <Stack.Screen name="Home" options={{ headerShown: false }} />
-      <Stack.Screen name="add-habit" options={{ headerShown: false }} />
+        <Stack.Screen name="Splash" options={{ headerShown: false }} />
+        <Stack.Screen name="Login" options={{ headerShown: false }} />
+        <Stack.Screen name="SignUp" options={{ headerShown: false }} />
+        <Stack.Screen name="Welcome" options={{ headerShown: false }} />
+        <Stack.Screen name="Home" options={{ headerShown: false }} />
+        <Stack.Screen name="add-habit" options={{ headerShown: false }} />
       </Stack>
     </AuthProvider>
   );

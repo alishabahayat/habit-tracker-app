@@ -1,18 +1,15 @@
 // app/Home.js
-import { useState, useEffect } from 'react';
-import {
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { AuthContext } from './_contexts/AuthContext';
-import { useLocalSearchParams } from 'expo-router';
-
-
 
 // Helper function to format date as "Jul 9"
 function formatDate(d) {
@@ -22,32 +19,38 @@ function formatDate(d) {
   });
 }
 
+// assets
+const BACKGROUND_IMAGE_1 = require('../assets/images/background image 1.png');
+const BACKGROUND_IMAGE_2 = require('../assets/images/background image 2.png');
+
 // Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#96AA9F',
+    position: 'relative',
   },
-  backgroundImage: {
+  backgroundImage1: {
     position: 'absolute',
-    top: 0,
+    bottom: 29.8,
     left: 0,
-    right: 0,
-    height: '100%',
-    opacity: 0.1,
-  },
-  appBorder: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
     width: '100%',
     height: '100%',
-    resizeMode: 'stretch',
-    transform: [{ rotate: '180deg' }, { scale: 1.2 }],
-    opacity: 0.35,
+    opacity: 0.15,
+    resizeMode: 'contain',
   },
+  backgroundImage2: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    width: '100%',
+    height: 238,
+    opacity: 0.9,
+    resizeMode: 'contain',
+    transform: [{ rotate: '180deg' }],
+  },
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -247,50 +250,60 @@ const styles = StyleSheet.create({
   }
 });
 
-// Home Component
-function Home() {
+export default function Home() {
   const router = useRouter();
   const authContext = useContext(AuthContext);
   const { userId } = authContext.user || {};
-  
-  // State for habits
-  const [habits, setHabits] = useState([]);
 
-  // Fetch habits when component mounts and when route changes
+  useEffect(() => {
+    // Initialize AsyncStorage
+    try {
+      AsyncStorage.getItem('users').then(users => {
+        if (users) {
+          console.log('Users loaded from storage:', users);
+        }
+      });
+    } catch (error) {
+      console.error('Error initializing AsyncStorage:', error);
+    }
+  }, []);
+  const [habits, setHabits] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date());
+
   useEffect(() => {
     if (userId) {
       fetchHabits();
     }
   }, [userId, router]);
 
-  // Function to fetch habits from database
   const fetchHabits = async () => {
     try {
-      console.log('Fetching habits for userId:', userId);
+      console.log('Starting to fetch habits');
+      console.log('Current userId:', userId);
       
-      // Get all habits from AsyncStorage
       const allHabits = JSON.parse(await AsyncStorage.getItem('habits') || '[]');
-      console.log('All habits from storage:', allHabits);
+      console.log('Raw habits data from storage:', allHabits);
       
-      // Filter habits for current user
       const userHabits = allHabits.filter(h => h.user_id === userId);
-      console.log('User habits filtered:', userHabits);
+      console.log('Filtered habits for user:', userHabits);
       
-      // Update state
       setHabits(userHabits);
-      console.log('Habits state updated with:', userHabits);
+      console.log('Habits state updated successfully');
     } catch (error) {
       console.error('Error fetching habits:', error);
+      console.error('Error details:', error.message);
     }
   };
 
-  // Log user state for debugging
   useEffect(() => {
-    console.log('User state:', authContext.user);
-  }, [authContext.user]);
-
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [currentDate, setCurrentDate] = useState(new Date());
+    console.log('User state changed:', authContext.user);
+    console.log('User ID:', userId);
+    
+    if (userId) {
+      fetchHabits();
+    }
+  }, [authContext.user, userId]);
 
   const goToday = () => setCurrentDate(new Date());
   const goToDate = (date) => {
@@ -316,15 +329,8 @@ function Home() {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../assets/images/background image 1.png')}
-        style={styles.backgroundImage}
-      />
-      <Image
-        source={require('../assets/images/background image 2.png')}
-        style={styles.appBorder}
-      />
-
+      <Image source={BACKGROUND_IMAGE_2} style={styles.backgroundImage2} />
+      <Image source={BACKGROUND_IMAGE_1} style={styles.backgroundImage1} />
       <View style={styles.header}>
         <TouchableOpacity onPress={goToday}>
           <Text style={[
@@ -345,11 +351,11 @@ function Home() {
               style={styles.createIcon}
             />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.createBtn} onPress={() => {
-         router.push('add-habit');
-       }}>
-        <Image source={require('../assets/images/Create Button.png')} style={styles.createIcon} />
-      </TouchableOpacity>
+          <TouchableOpacity style={styles.createBtn} onPress={() => router.push('add-habit')}>
+          <View style={styles.createIcon}>
+            <Text style={styles.createIconText}>+</Text>
+          </View>
+        </TouchableOpacity>
         </View>
       </View>
 
@@ -412,9 +418,7 @@ function Home() {
       </View>
 
       {/* Add Event Button */}
-      <TouchableOpacity style={styles.addEvent} onPress={() => {
-        router.push('add-habit');
-      }}>
+      <TouchableOpacity style={styles.addEvent} onPress={() => router.push('add-habit')}>
         <View style={styles.addCircle}>
           <Text style={styles.plusSign}>+</Text>
         </View>
@@ -445,4 +449,4 @@ function Home() {
   );
 }
 
-export default Home;
+
