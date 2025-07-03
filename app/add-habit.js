@@ -245,8 +245,10 @@ export default function AddHabit() {
         user_id: userId,
         emoji,
         name: activity,
-        color
+        color,
+        isFavorite: false, 
       };
+      
       console.log('Created new habit:', newHabit);
 
       // Add to habits array

@@ -1,4 +1,8 @@
 // app/Home.js
+//
+
+
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
@@ -11,6 +15,10 @@ import {
 } from 'react-native';
 import { AuthContext } from './_contexts/AuthContext';
 
+
+
+
+
 // Helper function to format date as "Jul 9"
 function formatDate(d) {
   return d.toLocaleString('en-US', {
@@ -19,11 +27,11 @@ function formatDate(d) {
   });
 }
 
-// assets
+// Assets 
 const BACKGROUND_IMAGE_1 = require('../assets/images/background image 1.png');
 const BACKGROUND_IMAGE_2 = require('../assets/images/background image 2.png');
 
-// Styles
+// Styles 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -267,10 +275,26 @@ export default function Home() {
       console.error('Error initializing AsyncStorage:', error);
     }
   }, []);
-  const [habits, setHabits] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [currentDate, setCurrentDate] = useState(new Date());
 
+  const toggleFavorite = async (habitId) => {
+    const updatedHabits = habits.map(habit =>
+      habit.id === habitId
+        ? { ...habit, isFavorite: !habit.isFavorite }
+        : habit
+    );
+    setHabits(updatedHabits);
+
+
+    const allHabits = JSON.parse(await AsyncStorage.getItem('habits') || '[]');
+    const updatedAllHabits = allHabits.map(habit =>
+      habit.id === habitId
+        ? { ...habit, isFavorite: !habit.isFavorite }
+        : habit
+    );
+    await AsyncStorage.setItem('habits', JSON.stringify(updatedAllHabits));
+  };
+
+  
   useEffect(() => {
     if (userId) {
       fetchHabits();
@@ -365,9 +389,18 @@ export default function Home() {
       <View style={styles.habitsContainer}>
         {habits.map((habit, index) => (
           <View key={habit.id} style={[styles.habitItem, { backgroundColor: habit.color }]}>
-            <Text style={styles.habitEmoji}>{habit.emoji}</Text>
-            <Text style={styles.habitText}>{habit.name}</Text>
-          </View>
+          <Text style={styles.habitEmoji}>{habit.emoji}</Text>
+          <Text style={styles.habitText}>{habit.name}</Text>
+          <TouchableOpacity
+            onPress={() => toggleFavorite(habit.id)}
+            style={{ marginLeft: 'auto' }}
+          >
+            <Text style={{ fontSize: 20 }}>
+              {habit.isFavorite ? '⭐️' : '☆'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        
         ))}
       </View>
 
@@ -386,7 +419,7 @@ export default function Home() {
           {days.map((d, idx) => {
             const isToday =
               d.toDateString() === new Date().toDateString();
-            return (
+              return (
               <TouchableOpacity 
                 key={idx} 
                 style={styles.dayBox} 
@@ -432,12 +465,12 @@ export default function Home() {
           />
           <View style={styles.activeDot} />
         </View>
-        <TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push('Favorites')}>
           <Image
             source={require('../assets/images/Favorite_light.png')}
             style={styles.navIcon}
-          />
-        </TouchableOpacity>
+            />
+</TouchableOpacity>
         <TouchableOpacity>
           <Image
             source={require('../assets/images/Question_light.png')}
