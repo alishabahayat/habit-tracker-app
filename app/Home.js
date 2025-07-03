@@ -33,6 +33,7 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
     paddingTop: 0,
     marginBottom: 8,
+    marginTop: 58,
   },
   habitsScroll: {
     flex: 1,
