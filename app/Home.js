@@ -230,7 +230,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     padding: 10,
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -239,6 +238,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  habitEmoji: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  habitEmoji: {
+    fontSize: 24,
+    marginRight: 10,
   },
   habitEmoji: {
     fontSize: 24,
@@ -379,10 +386,14 @@ export default function Home() {
       {/* Habits List */}
       <View style={styles.habitsContainer}>
         {habits.map((habit, index) => (
-          <View key={habit.id} style={[styles.habitItem, { backgroundColor: habit.color }]}>
-            <Text style={styles.habitEmoji}>{habit.emoji}</Text>
+          <TouchableOpacity 
+            key={habit.id} 
+            style={styles.habitItem}
+            onPress={() => router.push(`/edit-habit?habitId=${habit.id}`)}
+          >
+            <Text style={[styles.habitEmoji, { color: habit.color }]}>{habit.emoji}</Text>
             <Text style={styles.habitText}>{habit.name}</Text>
-          </View>
+          </TouchableOpacity>
         ))}
       </View>
 

@@ -167,9 +167,11 @@ export const getUser = async (email, password) => {
  * @param {string} emoji
  * @param {string} activity
  * @param {string} color
+ * @param {Date} startDate
+ * @param {string} frequency
  * @returns Promise resolving to the new habit's insertId
  */
-export const addHabit = async (userId, emoji, activity, color) => {
+export const addHabit = async (userId, emoji, activity, color, startDate, frequency) => {
   try {
     console.log('Adding habit with userId:', userId);
     
@@ -183,7 +185,9 @@ export const addHabit = async (userId, emoji, activity, color) => {
       user_id: userId,
       emoji,
       name: activity,
-      color
+      color,
+      start_date: startDate.toISOString(),
+      frequency: frequency
     };
     console.log('New habit:', newHabit);
     
@@ -197,6 +201,63 @@ export const addHabit = async (userId, emoji, activity, color) => {
     return newHabit.id;
   } catch (error) {
     console.error('Error adding habit:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update an existing habit.
+ * @param {string} habitId
+ * @param {object} updates - Object containing fields to update
+ * @returns Promise resolving to the updated habit
+ */
+export const updateHabit = async (habitId, updates) => {
+  try {
+    // Get existing habits
+    const existingHabits = JSON.parse(await AsyncStorage.getItem('habits') || '[]');
+    console.log('Existing habits:', existingHabits);
+
+    // Find and update the habit
+    const habitIndex = existingHabits.findIndex(h => h.id === habitId);
+    if (habitIndex === -1) {
+      throw new Error('Habit not found');
+    }
+
+    const updatedHabit = { ...existingHabits[habitIndex], ...updates };
+    existingHabits[habitIndex] = updatedHabit;
+
+    // Save to AsyncStorage
+    await AsyncStorage.setItem('habits', JSON.stringify(existingHabits));
+    console.log('Updated habit:', updatedHabit);
+
+    return updatedHabit;
+  } catch (error) {
+    console.error('Error updating habit:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a habit.
+ * @param {string} habitId
+ * @returns Promise resolving to true if successful
+ */
+export const deleteHabit = async (habitId) => {
+  try {
+    // Get existing habits
+    const existingHabits = JSON.parse(await AsyncStorage.getItem('habits') || '[]');
+    console.log('Existing habits:', existingHabits);
+
+    // Remove the habit
+    const updatedHabits = existingHabits.filter(h => h.id !== habitId);
+
+    // Save to AsyncStorage
+    await AsyncStorage.setItem('habits', JSON.stringify(updatedHabits));
+    console.log('Habit deleted:', habitId);
+
+    return true;
+  } catch (error) {
+    console.error('Error deleting habit:', error);
     throw error;
   }
 };

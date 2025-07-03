@@ -1,4 +1,4 @@
-// app/add-habit.js
+// app/edit-habit.js
 import { useContext, useState, useEffect } from 'react';
 import {
   Alert,
@@ -11,8 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { addHabit } from './_helpers/database';
+import { addHabit, updateHabit, deleteHabit } from './_helpers/database';
 import { useRouter } from 'expo-router';
 import { AuthContext } from './_contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -32,6 +31,16 @@ const EMOJIS = [
   '🎨', '🎮', '💻', '📚', '🎨', '🎵', '🎬', '🎭',
   '🍽️', '🍽️', '🥗', '🍔', '🍵', '🥤', '🍽️', '🍽️',
   '🏋️', '🚴', '🏊', '🏃', '🧘', '🧘', '🧘', '🧘',
+];
+
+// frequency options
+const FREQUENCIES = [
+  { value: 'daily', label: 'Every day' },
+  { value: 'every-other-day', label: 'Every other day' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'biweekly', label: 'Every 2 weeks' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'custom', label: 'Custom...' },
 ];
 
 // styles
@@ -62,7 +71,7 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: 'center',
     width: '100%',
-    marginBottom: 120, // Make space for footer
+    marginBottom: 120,
   },
   header: {
     flexDirection: 'row',
@@ -124,29 +133,6 @@ const styles = StyleSheet.create({
   colorList: {
     paddingVertical: 20,
   },
-  frequencyContainer: {
-    marginVertical: 20,
-  },
-  frequencyLabel: {
-    fontSize: 18,
-    color: '#5C5C5C',
-    marginBottom: 10,
-  },
-  frequencyPicker: {
-    borderWidth: 2,
-    borderRadius: 10,
-    padding: 15,
-    marginHorizontal: 20,
-  },
-  startDateContainer: {
-    marginVertical: 20,
-  },
-  startDateLabel: {
-    fontSize: 18,
-    color: '#5C5C5C',
-    marginBottom: 10,
-  },
-
   colorDot: {
     width: DOT_SIZE,
     height: DOT_SIZE,
@@ -224,12 +210,54 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
   },
+  deleteButton: {
+    backgroundColor: '#FF4444',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  deleteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  frequencyContainer: {
+    marginVertical: 20,
+  },
+  frequencyLabel: {
+    fontSize: 18,
+    color: '#5C5C5C',
+    marginBottom: 10,
+  },
+  frequencyPicker: {
+    borderWidth: 2,
+    borderRadius: 10,
+    padding: 15,
+    marginHorizontal: 20,
+  },
+  startDateContainer: {
+    marginVertical: 20,
+  },
+  startDateLabel: {
+    fontSize: 18,
+    color: '#5C5C5C',
+    marginBottom: 10,
+  },
+  startDateInput: {
+    borderWidth: 2,
+    borderRadius: 10,
+    padding: 15,
+    marginHorizontal: 20,
+  },
 });
 
-export default function AddHabit() {
+export default function EditHabit({ route }) {
   const router = useRouter();
   const authContext = useContext(AuthContext);
   const { userId } = authContext.user || {};
+  const { habitId } = route.params;
 
   const [activity, setActivity] = useState('');
   const [emoji, setEmoji] = useState('😀');
@@ -237,17 +265,28 @@ export default function AddHabit() {
   const [emojiBoxColor, setEmojiBoxColor] = useState('#000000');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [frequency, setFrequency] = useState('daily');
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(new Date());
+  const [habit, setHabit] = useState(null);
 
-  // Log user state when component mounts
   useEffect(() => {
-    console.log('AddHabit component mounted with user:', authContext.user);
-  }, [authContext.user]);
-
-  // Log activity changes
-  useEffect(() => {
-    console.log('Activity changed:', activity);
-  }, [activity]);
+    const loadHabit = async () => {
+      try {
+        const habits = JSON.parse(await AsyncStorage.getItem('habits') || '[]');
+        const foundHabit = habits.find(h => h.id === habitId);
+        if (foundHabit) {
+          setHabit(foundHabit);
+          setActivity(foundHabit.name);
+          setEmoji(foundHabit.emoji);
+          setColor(foundHabit.color);
+          setFrequency(foundHabit.frequency || 'daily');
+          setStartDate(new Date(foundHabit.start_date));
+        }
+      } catch (error) {
+        console.error('Error loading habit:', error);
+      }
+    };
+    loadHabit();
+  }, [habitId]);
 
   const handleSave = async () => {
     if (!activity.trim()) {
@@ -256,49 +295,53 @@ export default function AddHabit() {
     }
 
     try {
-      console.log('Starting to add habit with userId:', userId);
-      console.log('Current activity:', activity);
-      console.log('Selected emoji:', emoji);
-      console.log('Selected color:', color);
-      console.log('Selected frequency:', frequency);
-      console.log('Selected start date:', selectedDate);
-
-      // Get existing habits
-      const existingHabits = JSON.parse(await AsyncStorage.getItem('habits') || '[]');
-      console.log('Existing habits in storage:', existingHabits);
-
-      // Create new habit
-      const newHabit = {
-        id: Date.now().toString(),
-        user_id: userId,
-        emoji,
+      const updates = {
         name: activity,
+        emoji,
         color,
-        start_date: selectedDate.toISOString(),
-        frequency
+        frequency,
+        start_date: startDate.toISOString(),
       };
-      console.log('Created new habit:', newHabit);
 
-      // Add to habits array
-      existingHabits.push(newHabit);
-      console.log('Habits array after adding:', existingHabits);
-
-      // Save to AsyncStorage
-      await AsyncStorage.setItem('habits', JSON.stringify(existingHabits));
-      console.log('Habits saved to storage successfully');
-
+      await updateHabit(habitId, updates);
       router.back();
     } catch (error) {
-      console.error('Error adding habit:', error);
-      Alert.alert('Error', 'Failed to add habit');
+      console.error('Error updating habit:', error);
+      Alert.alert('Error', 'Failed to update habit');
     }
   };
 
+  const handleDelete = async () => {
+    Alert.alert(
+      'Delete Habit',
+      'Are you sure you want to delete this habit?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteHabit(habitId);
+              router.back();
+            } catch (error) {
+              console.error('Error deleting habit:', error);
+              Alert.alert('Error', 'Failed to delete habit');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleBack = () => {
-    if (activity.trim() !== '') {
+    if (activity.trim() !== habit?.name) {
       Alert.alert(
         'Unsaved Changes',
-        'Would you like to save your activity before leaving?',
+        'Would you like to save your changes before leaving?',
         [
           {
             text: 'Cancel',
@@ -308,9 +351,7 @@ export default function AddHabit() {
           {
             text: 'Save',
             style: 'default',
-            onPress: () => {
-              handleSave();
-            }
+            onPress: handleSave
           },
           {
             text: 'Discard',
@@ -327,15 +368,14 @@ export default function AddHabit() {
 
   return (
     <View style={styles.container}>
-      {/* ── HEADER ────────────────────── */}
+      <TouchableOpacity onPress={handleBack}>
+        <Image source={X_BUTTON} style={styles.xButton} />
+      </TouchableOpacity>
+
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack}>
-          <Image source={X_BUTTON} style={styles.xButton} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Create <Text style={styles.headerAccent}>Activity</Text></Text>
+        <Text style={styles.headerTitle}>Edit <Text style={styles.headerAccent}>Activity</Text></Text>
       </View>
 
-      {/* ── CENTERED CONTENT ───────────────── */}
       <View style={styles.centeredContent}>
         <View style={styles.whatRow}>
           <Text style={styles.label}>What?</Text>
@@ -354,7 +394,6 @@ export default function AddHabit() {
           onChangeText={setActivity}
         />
 
-        {/* ── FREQUENCY PICKER ────────────── */}
         <View style={styles.frequencyContainer}>
           <Text style={styles.frequencyLabel}>Frequency</Text>
           <TextInput
@@ -365,24 +404,16 @@ export default function AddHabit() {
           />
         </View>
 
-        {/* ── START DATE PICKER ───────────── */}
         <View style={styles.startDateContainer}>
           <Text style={styles.startDateLabel}>Start Date</Text>
-          <DateTimePicker
-            value={selectedDate}
-            mode="date"
-            is24Hour={true}
-            display="default"
-            onChange={(event, date) => {
-              if (date) {
-                setSelectedDate(date);
-              }
-            }}
-            minimumDate={new Date()}
+          <TextInput
+            style={styles.startDateInput}
+            value={startDate.toLocaleDateString()}
+            onChangeText={(text) => setStartDate(new Date(text))}
+            placeholder="Select start date"
           />
         </View>
 
-        {/* ── COLOR PICKER ────────────────── */}
         <FlatList
           data={COLORS}
           keyExtractor={(c) => c}
@@ -413,7 +444,6 @@ export default function AddHabit() {
           )}
         />
 
-        {/* ── EMOJI PICKER MODAL ──────────── */}
         <Modal
           visible={showEmojiPicker}
           transparent
@@ -449,19 +479,17 @@ export default function AddHabit() {
             </View>
           </View>
         </Modal>
-
       </View>
 
-      {/* ── ADD BUTTON ────────────────────── */}
       <TouchableOpacity style={styles.addButton} onPress={handleSave}>
-        <Text style={styles.addButtonText}>Add Activity</Text>
+        <Text style={styles.addButtonText}>Save Changes</Text>
       </TouchableOpacity>
 
-      {/* ── SUNNY LEAVES FOOTER ─────────── */}
-      <Image
-        source={SUNNY_LEAVES}
-        style={styles.footerLeaves}
-      />
+      <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+        <Text style={styles.deleteButtonText}>Delete Habit</Text>
+      </TouchableOpacity>
+
+      <Image source={SUNNY_LEAVES} style={styles.sunnyLeaves} />
     </View>
   );
 }
