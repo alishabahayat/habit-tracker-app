@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import { addHabit, updateHabit, deleteHabit } from './_helpers/database';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { AuthContext } from './_contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -253,11 +253,29 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function EditHabit({ route }) {
+export default function EditHabit() {
   const router = useRouter();
+  let habitId;
+  // Use expo-router v2+ correct hook
+  try {
+    const params = useLocalSearchParams();
+    habitId = params.habitId;
+  } catch (e) {
+    // Fallback: try parsing from window.location.search if available (web)
+    if (typeof window !== 'undefined' && window.location && window.location.search) {
+      const params = new URLSearchParams(window.location.search);
+      habitId = params.get('habitId');
+    }
+  }
   const authContext = useContext(AuthContext);
   const { userId } = authContext.user || {};
-  const { habitId } = route.params;
+  if (!habitId) {
+    return (
+      <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
+        <Text style={{color:'red'}}>Error: No habitId provided in route params.</Text>
+      </View>
+    );
+  }
 
   const [activity, setActivity] = useState('');
   const [emoji, setEmoji] = useState('😀');
