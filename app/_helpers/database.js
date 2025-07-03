@@ -187,7 +187,14 @@ export const addHabit = async (userId, emoji, activity, color, startDate, freque
       name: activity,
       color,
       start_date: startDate.toISOString(),
-      frequency: frequency
+      frequency: habit.frequency || {
+        type: frequency,
+        interval: 1,
+        daysOfWeek: [],
+        daysOfMonth: [],
+        monthsOfYear: [],
+        dayOfMonth: 1
+      }
     };
     console.log('New habit:', newHabit);
     
