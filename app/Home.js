@@ -4,11 +4,11 @@ import { useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  ScrollView,
 } from 'react-native';
 import { AuthContext } from './_contexts/AuthContext';
 
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
     paddingTop: 0,
     marginBottom: 8,
-    marginTop: 58,
+    marginTop: 57,
   },
   habitsScroll: {
     flex: 1,
@@ -104,7 +104,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#4A4A4A',
     textAlign: 'center',
-    marginVertical: 20,
+    marginTop: 20,
+    transform: [{ translateY: 45 }],
   },
   dayScroller: {
     flexDirection: 'row',
@@ -394,7 +395,7 @@ export default function Home() {
         </View>
       </View>
 
-      <Text style={styles.greeting}>Welcome, Charlie</Text>
+      <Text style={styles.greeting}>Hello, Charlie</Text>
 
       {/* 7-Day Scroller (Fixed) */}
       <View style={styles.dayScrollerWrapper}>
