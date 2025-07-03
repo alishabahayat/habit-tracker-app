@@ -27,7 +27,9 @@ export default function Welcome() {
         if (userId) {
           const user = users.find(u => u.id === userId);
           if (user) {
+            console.log('Found user in storage:', { id: user.id, email: user.email, name: user.name });
             const userData = await authContext.signIn(user.email, user.password);
+            console.log('User signed in:', userData);
             if (userData) {
               console.log('User initialized:', userData);
               router.replace('Home');

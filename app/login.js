@@ -1,10 +1,10 @@
 // app/login.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState, useContext, useEffect } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
-import { AuthContext } from './_contexts/AuthContext';
-import { initializeDatabase, getUser } from './_helpers/database';
 import { useRouter } from 'expo-router';
+import { useContext, useState } from 'react';
+import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { AuthContext } from './_contexts/AuthContext';
+import { getUser } from './_helpers/database';
 
 export default function Login() {
   const router = useRouter();

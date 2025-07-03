@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }) => {
           const users = JSON.parse(usersString);
           const foundUser = users.find(u => u.id === userId);
           if (foundUser) {
+            console.log('Loading user from storage:', { id: foundUser.id, email: foundUser.email, name: foundUser.name });
             setUser({ id: foundUser.id, email: foundUser.email, name: foundUser.name });
           }
         }
@@ -50,6 +51,7 @@ export const AuthProvider = ({ children }) => {
       
       if (user) {
         await AsyncStorage.setItem('userId', user.id);
+        console.log('Signing in user:', { id: user.id, email: user.email, name: user.name });
         setUser({ id: user.id, email: user.email, name: user.name });
         return true;
       }
@@ -73,6 +75,7 @@ export const AuthProvider = ({ children }) => {
       users.push(newUser);
       await AsyncStorage.setItem('users', JSON.stringify(users));
       await AsyncStorage.setItem('userId', newUser.id);
+      console.log('Creating new user:', { id: newUser.id, email, name });
       setUser({ id: newUser.id, email, name });
       return true;
     } catch (error) {
@@ -84,6 +87,7 @@ export const AuthProvider = ({ children }) => {
   const signOut = async () => {
     try {
       await AsyncStorage.removeItem('userId');
+      console.log('Signing out user');
       setUser(null);
       return true;
     } catch (error) {

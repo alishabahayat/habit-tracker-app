@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+//app/Splash.js
 import { useRouter } from 'expo-router';
-import { Alert } from 'react-native';
+import { useEffect } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 export default function Splash() {
   const router = useRouter();

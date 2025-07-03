@@ -253,20 +253,23 @@ const styles = StyleSheet.create({
 export default function Home() {
   const router = useRouter();
   const authContext = useContext(AuthContext);
-  const { userId } = authContext.user || {};
+  const { user } = authContext;
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    // Initialize AsyncStorage
-    try {
-      AsyncStorage.getItem('users').then(users => {
-        if (users) {
-          console.log('Users loaded from storage:', users);
-        }
-      });
-    } catch (error) {
-      console.error('Error initializing AsyncStorage:', error);
-    }
+    // Load user ID from AsyncStorage
+    const loadUserId = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem('userId');
+        setUserId(storedUserId);
+        console.log('Loaded userId from AsyncStorage:', storedUserId);
+      } catch (error) {
+        console.error('Error loading userId:', error);
+      }
+    };
+    loadUserId();
   }, []);
+
   const [habits, setHabits] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -275,24 +278,36 @@ export default function Home() {
     if (userId) {
       fetchHabits();
     }
-  }, [userId, router]);
+  }, [userId]);
 
   const fetchHabits = async () => {
     try {
       console.log('Starting to fetch habits');
       console.log('Current userId:', userId);
       
-      const allHabits = JSON.parse(await AsyncStorage.getItem('habits') || '[]');
-      console.log('Raw habits data from storage:', allHabits);
+      // Get all habits
+      const allHabitsString = await AsyncStorage.getItem('habits');
+      console.log('Raw habits string:', allHabitsString);
       
+      if (!allHabitsString) {
+        console.log('No habits found in storage');
+        setHabits([]);
+        return;
+      }
+      
+      const allHabits = JSON.parse(allHabitsString);
+      console.log('Parsed habits:', allHabits);
+      
+      // Filter habits for current user
       const userHabits = allHabits.filter(h => h.user_id === userId);
-      console.log('Filtered habits for user:', userHabits);
+      console.log('Filtered habits:', userHabits);
       
       setHabits(userHabits);
       console.log('Habits state updated successfully');
     } catch (error) {
       console.error('Error fetching habits:', error);
       console.error('Error details:', error.message);
+      setHabits([]); // Clear habits on error
     }
   };
 
