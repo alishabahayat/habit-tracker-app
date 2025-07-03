@@ -8,6 +8,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ScrollView,
 } from 'react-native';
 import { AuthContext } from './_contexts/AuthContext';
 
@@ -25,6 +26,18 @@ const BACKGROUND_IMAGE_2 = require('../assets/images/background image 2.png');
 
 // Styles
 const styles = StyleSheet.create({
+  dayScrollerWrapper: {
+    position: 'relative',
+    zIndex: 2,
+    backgroundColor: '#96AA9F',
+    paddingBottom: 0,
+    paddingTop: 0,
+    marginBottom: 8,
+  },
+  habitsScroll: {
+    flex: 1,
+    marginBottom: 16,
+  },
   container: {
     flex: 1,
     backgroundColor: '#96AA9F',
@@ -74,7 +87,7 @@ const styles = StyleSheet.create({
     height: 24,
   },
   createBtn: {
-    backgroundColor: '#96AA9F',
+    backgroundColor: '#718278',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 16,
@@ -351,6 +364,7 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
+
       <Image source={BACKGROUND_IMAGE_2} style={styles.backgroundImage2} />
       <Image source={BACKGROUND_IMAGE_1} style={styles.backgroundImage1} />
       <View style={styles.header}>
@@ -373,18 +387,64 @@ export default function Home() {
               style={styles.createIcon}
             />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.createBtn} onPress={() => router.push('add-habit')}>
-          <View style={styles.createIcon}>
-            <Text style={styles.createIconText}>+</Text>
-          </View>
-        </TouchableOpacity>
+          <TouchableOpacity style={[styles.createBtn, { backgroundColor: '#718278' }]} onPress={() => router.push('add-habit')}>
+            <Text style={{ color: '#C8C8C8', fontWeight: 'bold', fontSize: 16 }}>Create Habit</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
       <Text style={styles.greeting}>Welcome, Charlie</Text>
 
-      {/* Habits List */}
-      <View style={styles.habitsContainer}>
+      {/* 7-Day Scroller (Fixed) */}
+      <View style={styles.dayScrollerWrapper}>
+        <View style={styles.dayScroller}>
+          <TouchableOpacity onPress={goPrevDay} style={styles.arrowButton}>
+            <View style={styles.arrow}>
+              <Image
+                source={require('../assets/images/Next Page Button.png')}
+                style={[styles.arrowIcon, styles.arrowLeft]}
+              />
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.dayBoxes}>
+            {days.map((d, idx) => {
+              const isToday =
+                d.toDateString() === new Date().toDateString();
+              return (
+                <TouchableOpacity 
+                  key={idx} 
+                  style={styles.dayBox} 
+                  onPress={() => goToDate(d)}
+                >
+                  <View style={
+                    selectedDate.toDateString() === d.toDateString() 
+                      ? styles.selectedBackground 
+                      : styles.dateBackground
+                  }>
+                    <View style={styles.dateBoxContent}>
+                      <Text style={styles.dayName}>{d.toLocaleString('en-US', { weekday: 'short' })}</Text>
+                      <Text style={isToday ? [styles.dayNum, styles.dayNumActive] : styles.dayNum}>{d.getDate()}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          <TouchableOpacity onPress={goNextDay} style={styles.arrowButton}>
+            <View style={styles.arrow}>
+              <Image
+                source={require('../assets/images/Next Page Button.png')}
+                style={styles.arrowIcon}
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Habits List (Scrollable) */}
+      <ScrollView style={styles.habitsScroll} contentContainerStyle={styles.habitsContainer}>
         {habits.map((habit, index) => (
           <TouchableOpacity 
             key={habit.id} 
@@ -395,53 +455,7 @@ export default function Home() {
             <Text style={styles.habitText}>{habit.name}</Text>
           </TouchableOpacity>
         ))}
-      </View>
-
-      {/* 7-Day Scroller */}
-      <View style={styles.dayScroller}>
-        <TouchableOpacity onPress={goPrevDay} style={styles.arrowButton}>
-          <View style={styles.arrow}>
-            <Image
-              source={require('../assets/images/Next Page Button.png')}
-              style={[styles.arrowIcon, styles.arrowLeft]}
-            />
-          </View>
-        </TouchableOpacity>
-
-        <View style={styles.dayBoxes}>
-          {days.map((d, idx) => {
-            const isToday =
-              d.toDateString() === new Date().toDateString();
-            return (
-              <TouchableOpacity 
-                key={idx} 
-                style={styles.dayBox} 
-                onPress={() => goToDate(d)}
-              >
-                <View style={
-                  selectedDate.toDateString() === d.toDateString() 
-                    ? styles.selectedBackground 
-                    : styles.dateBackground
-                }>
-                  <View style={styles.dateBoxContent}>
-                    <Text style={styles.dayName}>{d.toLocaleString('en-US', { weekday: 'short' })}</Text>
-                    <Text style={isToday ? [styles.dayNum, styles.dayNumActive] : styles.dayNum}>{d.getDate()}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        <TouchableOpacity onPress={goNextDay} style={styles.arrowButton}>
-          <View style={styles.arrow}>
-            <Image
-              source={require('../assets/images/Next Page Button.png')}
-              style={styles.arrowIcon}
-            />
-          </View>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
 
       {/* Add Event Button */}
       <TouchableOpacity style={styles.addEvent} onPress={() => router.push('add-habit')}>
@@ -474,5 +488,6 @@ export default function Home() {
     </View>
   );
 }
+
 
 
