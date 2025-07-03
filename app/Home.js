@@ -9,6 +9,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
 import { AuthContext } from './_contexts/AuthContext';
 
@@ -476,7 +477,23 @@ export default function Home() {
             style={styles.navIcon}
           />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          Alert.alert(
+            'Log Out',
+            'Are you sure you want to log out?',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Yes',
+                style: 'destructive',
+                onPress: async () => {
+                  await authContext.signOut();
+                  router.replace('/Login');
+                }
+              }
+            ]
+          );
+        }}>
           <Image
             source={require('../assets/images/Question_light.png')}
             style={styles.navIcon}
