@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { FlatList, Text, View } from 'react-native';
 import { HabitsContext } from './_contexts/HabitsContext';
 
-export default function Favorites() {
+export default function Streaks() {
   const { habits } = useContext(HabitsContext);
 
   return (

@@ -17,7 +17,7 @@ export default function Layout() {
           <Stack.Screen name="Welcome" options={{ headerShown: false }} />
           <Stack.Screen name="Home" options={{ headerShown: false }} />
           <Stack.Screen name="add-habit" options={{ headerShown: false }} />
-          <Stack.Screen name="Favorites" options={{ headerShown: false }} />
+          <Stack.Screen name="Streaks" options={{ headerShown: false }} />
           {/* Add more screens like Favorites, edit-habit, etc. as needed */}
         </Stack>
       </HabitsProvider>
