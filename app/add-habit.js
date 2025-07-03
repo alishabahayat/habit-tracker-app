@@ -8,6 +8,7 @@ import {
   FlatList,
   Image,
   Modal,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -62,11 +63,8 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   xButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: 120, // Make space for footer
+    width: 24,
+    height: 24,
   },
   header: {
     flexDirection: 'row',
@@ -82,10 +80,6 @@ const styles = StyleSheet.create({
   },
   headerAccent: {
     color: '#84AB66',
-  },
-  xButton: {
-    width: 24,
-    height: 24,
   },
   whatRow: {
     flexDirection: 'row',
@@ -315,7 +309,7 @@ const styles = StyleSheet.create({
 export default function AddHabit() {
   const router = useRouter();
   const authContext = useContext(AuthContext);
-  const { userId } = authContext.user || {};
+  const { id: userId } = authContext.user || {};
 
   const [activity, setActivity] = useState('');
   const [emoji, setEmoji] = useState('😀');
@@ -427,68 +421,64 @@ export default function AddHabit() {
 
   return (
     <View style={styles.container}>
-      {/* ── HEADER ────────────────────── */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack}>
-          <Image source={X_BUTTON} style={styles.xButton} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Create <Text style={styles.headerAccent}>Activity</Text></Text>
-      </View>
-
-      {/* ── CENTERED CONTENT ───────────────── */}
-      <View style={styles.centeredContent}>
-        <View style={styles.whatRow}>
-          <Text style={styles.label}>What?</Text>
-          <TouchableOpacity
-            style={[styles.emojiBox, { backgroundColor: emojiBoxColor }]}
-            onPress={() => setShowEmojiPicker(true)}
-          >
-            <Text style={styles.emojiText}>{emoji}</Text>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+        {/* ── HEADER ────────────────────── */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack}>
+            <Image source={X_BUTTON} style={styles.xButton} />
           </TouchableOpacity>
+          <Text style={styles.headerTitle}>Create <Text style={styles.headerAccent}>Activity</Text></Text>
         </View>
-
-        <TextInput
-          style={[styles.input, { borderColor: emojiBoxColor }]}
-          placeholder="Enter activity name…"
-          value={activity}
-          onChangeText={setActivity}
-          multiline={true}
-          numberOfLines={3}
-        />
-
-        {/* ── FREQUENCY PICKER ────────────── */}
-        <View style={styles.frequencyContainer}>
-          <Text style={styles.frequencyLabel}>Frequency Type</Text>
-          <View style={styles.frequencyPicker}>
-            {['daily', 'weekly', 'monthly', 'yearly'].map((type) => (
-              <TouchableOpacity
-                key={type}
-                style={[
-                  styles.frequencyOption,
-                  frequency.type === type && styles.frequencyOptionSelected
-                ]}
-                onPress={() => {
-                  setFrequency(prev => ({
-                    ...prev,
-                    type,
-                    daysOfWeek: type === 'weekly' ? [] : prev.daysOfWeek,
-                    daysOfMonth: type === 'monthly' ? [] : prev.daysOfMonth,
-                    monthsOfYear: type === 'yearly' ? [] : prev.monthsOfYear
-                  }));
-                }}
-              >
-                <Text style={[
-                  styles.frequencyOptionText,
-                  frequency.type === type && styles.frequencyOptionTextSelected
-                ]}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
+        <View style={styles.centeredContent}>
+          <View style={styles.whatRow}>
+            <Text style={styles.label}>What?</Text>
+            <TouchableOpacity
+              style={[styles.emojiBox, { backgroundColor: emojiBoxColor }]}
+              onPress={() => setShowEmojiPicker(true)}
+            >
+              <Text style={styles.emojiText}>{emoji}</Text>
+            </TouchableOpacity>
           </View>
-
-          {frequency.type === 'daily' && (
-            <>
+          <TextInput
+            style={[styles.input, { borderColor: emojiBoxColor }]}
+            placeholder="Enter activity name…"
+            value={activity}
+            onChangeText={setActivity}
+            multiline={true}
+            numberOfLines={3}
+          />
+          {/* ── FREQUENCY PICKER ────────────── */}
+          <View style={styles.frequencyContainer}>
+            <Text style={styles.frequencyLabel}>Frequency Type</Text>
+            <View style={styles.frequencyPicker}>
+              {['daily', 'weekly', 'monthly', 'yearly'].map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={[
+                    styles.frequencyOption,
+                    frequency.type === type && styles.frequencyOptionSelected
+                  ]}
+                  onPress={() => {
+                    setFrequency(prev => ({
+                      ...prev,
+                      type,
+                      daysOfWeek: type === 'weekly' ? [] : prev.daysOfWeek,
+                      daysOfMonth: type === 'monthly' ? [] : prev.daysOfMonth,
+                      monthsOfYear: type === 'yearly' ? [] : prev.monthsOfYear
+                    }));
+                  }}
+                >
+                  <Text style={[
+                    styles.frequencyOptionText,
+                    frequency.type === type && styles.frequencyOptionTextSelected
+                  ]}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {/* Frequency details by type go here (already present in your code) */}
+            {frequency.type === 'daily' && (
               <View style={styles.frequencyContainerInline}>
                 <Text style={styles.frequencyLabel}>Every</Text>
                 <TextInput
@@ -505,260 +495,251 @@ export default function AddHabit() {
                 />
                 <Text style={styles.frequencyLabel}>day(s)</Text>
               </View>
-            </>
-          )}
-
-          {frequency.type === 'weekly' && (
-            <>
-              <View style={styles.frequencyContainerInline}>
-                <Text style={styles.frequencyLabel}>Every</Text>
+            )}
+            {frequency.type === 'weekly' && (
+              <>
+                <View style={styles.frequencyContainerInline}>
+                  <Text style={styles.frequencyLabel}>Every</Text>
+                  <TextInput
+                    style={styles.frequencyInput}
+                    value={frequency.interval.toString()}
+                    onChangeText={(value) => {
+                      const num = parseInt(value);
+                      if (!isNaN(num) && num > 0) {
+                        setFrequency(prev => ({ ...prev, interval: num }));
+                      }
+                    }}
+                    keyboardType="numeric"
+                    placeholder="1"
+                  />
+                  <Text style={styles.frequencyLabel}>week(s)</Text>
+                </View>
+                <Text style={styles.frequencyLabel}>Select days of the week:</Text>
+                <View style={styles.daysOfWeekContainer}>
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
+                    <TouchableOpacity
+                      key={day}
+                      style={[
+                        styles.dayButton,
+                        frequency.daysOfWeek.includes(index) && styles.selectedDayButton
+                      ]}
+                      onPress={() => {
+                        setFrequency(prev => ({
+                          ...prev,
+                          daysOfWeek: prev.daysOfWeek.includes(index)
+                            ? prev.daysOfWeek.filter(d => d !== index)
+                            : [...prev.daysOfWeek, index]
+                        }));
+                      }}
+                    >
+                      <Text style={[
+                        styles.dayButtonText,
+                        frequency.daysOfWeek.includes(index) && styles.selectedDayButtonText
+                      ]}>
+                        {day}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </>
+            )}
+            {frequency.type === 'monthly' && (
+              <>
+                <View style={styles.frequencyContainerInline}>
+                  <Text style={styles.frequencyLabel}>Every</Text>
+                  <TextInput
+                    style={styles.frequencyInput}
+                    value={frequency.interval.toString()}
+                    onChangeText={(value) => {
+                      const num = parseInt(value);
+                      if (!isNaN(num) && num > 0) {
+                        setFrequency(prev => ({ ...prev, interval: num }));
+                      }
+                    }}
+                    keyboardType="numeric"
+                    placeholder="1"
+                  />
+                  <Text style={styles.frequencyLabel}>month(s)</Text>
+                </View>
+                <Text style={styles.frequencyLabel}>Select days of the month:</Text>
+                <View style={styles.daysOfWeekContainer}>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                    <TouchableOpacity
+                      key={day}
+                      style={[
+                        styles.dayButton,
+                        frequency.daysOfMonth.includes(day) && styles.selectedDayButton
+                      ]}
+                      onPress={() => {
+                        setFrequency(prev => ({
+                          ...prev,
+                          daysOfMonth: prev.daysOfMonth.includes(day)
+                            ? prev.daysOfMonth.filter(d => d !== day)
+                            : [...prev.daysOfMonth, day]
+                        }));
+                      }}
+                    >
+                      <Text style={[
+                        styles.dayButtonText,
+                        frequency.daysOfMonth.includes(day) && styles.selectedDayButtonText
+                      ]}>
+                        {day}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </>
+            )}
+            {frequency.type === 'yearly' && (
+              <>
+                <View style={styles.frequencyContainerInline}>
+                  <Text style={styles.frequencyLabel}>Every</Text>
+                  <TextInput
+                    style={styles.frequencyInput}
+                    value={frequency.interval.toString()}
+                    onChangeText={(value) => {
+                      const num = parseInt(value);
+                      if (!isNaN(num) && num > 0) {
+                        setFrequency(prev => ({ ...prev, interval: num }));
+                      }
+                    }}
+                    keyboardType="numeric"
+                    placeholder="1"
+                  />
+                  <Text style={styles.frequencyLabel}>year(s)</Text>
+                </View>
+                <Text style={styles.frequencyLabel}>Select month:</Text>
+                <View style={styles.monthPicker}>
+                  {['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'].map((month, index) => (
+                    <TouchableOpacity
+                      key={month}
+                      style={[
+                        styles.monthPickerItem,
+                        frequency.monthsOfYear.includes(index) && styles.selectedDayButton
+                      ]}
+                      onPress={() => {
+                        setFrequency(prev => ({
+                          ...prev,
+                          monthsOfYear: prev.monthsOfYear.includes(index)
+                            ? prev.monthsOfYear.filter(m => m !== index)
+                            : [...prev.monthsOfYear, index]
+                        }));
+                      }}
+                    >
+                      <Text style={[
+                        styles.dayButtonText,
+                        frequency.monthsOfYear.includes(index) && styles.selectedDayButtonText
+                      ]}>
+                        {month}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <Text style={styles.frequencyLabel}>Select day of the month:</Text>
                 <TextInput
                   style={styles.frequencyInput}
-                  value={frequency.interval.toString()}
+                  value={frequency.dayOfMonth ? frequency.dayOfMonth.toString() : ''}
                   onChangeText={(value) => {
                     const num = parseInt(value);
-                    if (!isNaN(num) && num > 0) {
-                      setFrequency(prev => ({ ...prev, interval: num }));
+                    if (!isNaN(num) && num >= 1 && num <= 31) {
+                      setFrequency(prev => ({ ...prev, dayOfMonth: num }));
                     }
                   }}
                   keyboardType="numeric"
                   placeholder="1"
                 />
-                <Text style={styles.frequencyLabel}>week(s)</Text>
-              </View>
-              <Text style={styles.frequencyLabel}>Select days of the week:</Text>
-              <View style={styles.daysOfWeekContainer}>
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-                  <TouchableOpacity
-                    key={day}
-                    style={[
-                      styles.dayButton,
-                      frequency.daysOfWeek.includes(index) && styles.selectedDayButton
-                    ]}
-                    onPress={() => {
-                      setFrequency(prev => ({
-                        ...prev,
-                        daysOfWeek: prev.daysOfWeek.includes(index)
-                          ? prev.daysOfWeek.filter(d => d !== index)
-                          : [...prev.daysOfWeek, index]
-                      }));
-                    }}
-                  >
-                    <Text style={[
-                      styles.dayButtonText,
-                      frequency.daysOfWeek.includes(index) && styles.selectedDayButtonText
-                    ]}>
-                      {day}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </>
-          )}
-
-          {frequency.type === 'monthly' && (
-            <>
-              <View style={styles.frequencyContainerInline}>
-                <Text style={styles.frequencyLabel}>Every</Text>
-                <TextInput
-                  style={styles.frequencyInput}
-                  value={frequency.interval.toString()}
-                  onChangeText={(value) => {
-                    const num = parseInt(value);
-                    if (!isNaN(num) && num > 0) {
-                      setFrequency(prev => ({ ...prev, interval: num }));
-                    }
-                  }}
-                  keyboardType="numeric"
-                  placeholder="1"
-                />
-                <Text style={styles.frequencyLabel}>month(s)</Text>
-              </View>
-              <Text style={styles.frequencyLabel}>Select days of the month:</Text>
-              <View style={styles.daysOfWeekContainer}>
-                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                  <TouchableOpacity
-                    key={day}
-                    style={[
-                      styles.dayButton,
-                      frequency.daysOfMonth.includes(day) && styles.selectedDayButton
-                    ]}
-                    onPress={() => {
-                      setFrequency(prev => ({
-                        ...prev,
-                        daysOfMonth: prev.daysOfMonth.includes(day)
-                          ? prev.daysOfMonth.filter(d => d !== day)
-                          : [...prev.daysOfMonth, day]
-                      }));
-                    }}
-                  >
-                    <Text style={[
-                      styles.dayButtonText,
-                      frequency.daysOfMonth.includes(day) && styles.selectedDayButtonText
-                    ]}>
-                      {day}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </>
-          )}
-
-          {frequency.type === 'yearly' && (
-            <>
-              <View style={styles.frequencyContainerInline}>
-                <Text style={styles.frequencyLabel}>Every</Text>
-                <TextInput
-                  style={styles.frequencyInput}
-                  value={frequency.interval.toString()}
-                  onChangeText={(value) => {
-                    const num = parseInt(value);
-                    if (!isNaN(num) && num > 0) {
-                      setFrequency(prev => ({ ...prev, interval: num }));
-                    }
-                  }}
-                  keyboardType="numeric"
-                  placeholder="1"
-                />
-                <Text style={styles.frequencyLabel}>year(s)</Text>
-              </View>
-              <Text style={styles.frequencyLabel}>Select month:</Text>
-              <View style={styles.monthPicker}>
-                {['January', 'February', 'March', 'April', 'May', 'June',
-                  'July', 'August', 'September', 'October', 'November', 'December'].map((month, index) => (
-                  <TouchableOpacity
-                    key={month}
-                    style={[
-                      styles.monthPickerItem,
-                      frequency.monthsOfYear.includes(index) && styles.selectedDayButton
-                    ]}
-                    onPress={() => {
-                      setFrequency(prev => ({
-                        ...prev,
-                        monthsOfYear: prev.monthsOfYear.includes(index)
-                          ? prev.monthsOfYear.filter(m => m !== index)
-                          : [...prev.monthsOfYear, index]
-                      }));
-                    }}
-                  >
-                    <Text style={[
-                      styles.dayButtonText,
-                      frequency.monthsOfYear.includes(index) && styles.selectedDayButtonText
-                    ]}>
-                      {month}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <Text style={styles.frequencyLabel}>Select day of the month:</Text>
-              <TextInput
-                style={styles.frequencyInput}
-                value={frequency.dayOfMonth ? frequency.dayOfMonth.toString() : ''}
-                onChangeText={(value) => {
-                  const num = parseInt(value);
-                  if (!isNaN(num) && num >= 1 && num <= 31) {
-                    setFrequency(prev => ({ ...prev, dayOfMonth: num }));
-                  }
-                }}
-                keyboardType="numeric"
-                placeholder="1"
-              />
-            </>
-          )}
-        </View>
-
-        {/* ── START DATE PICKER ───────────── */}
-        <View style={styles.startDateContainer}>
-          <Text style={styles.startDateLabel}>Start Date</Text>
-          <DateTimePicker
-            value={selectedDate}
-            mode="date"
-            is24Hour={true}
-            display="default"
-            onChange={(event, date) => {
-              if (date) {
-                setSelectedDate(date);
-              }
-            }}
-            minimumDate={new Date()}
-          />
-        </View>
-
-        {/* ── COLOR PICKER ────────────────── */}
-        <FlatList
-          data={COLORS}
-          keyExtractor={(c) => c}
-          horizontal
-          contentContainerStyle={styles.colorList}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.colorDot,
-                { backgroundColor: item },
-                item === color && styles.colorDotActive,
-              ]}
-              onPress={() => {
-                setColor(item);
-                if (item === 'rainbow') {
-                  setEmojiBoxColor('#84AB66');
-                } else {
-                  const hexColor = item;
-                  const r = parseInt(hexColor.slice(1,3), 16);
-                  const g = parseInt(hexColor.slice(3,5), 16);
-                  const b = parseInt(hexColor.slice(5,7), 16);
-                  const rgbaColor = `rgba(${r},${g},${b},0.8)`;
-                  setEmojiBoxColor(rgbaColor);
+              </>
+            )}
+          </View>
+          {/* ── START DATE PICKER ───────────── */}
+          <View style={styles.startDateContainer}>
+            <Text style={styles.startDateLabel}>Start Date</Text>
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              is24Hour={true}
+              display="default"
+              onChange={(event, date) => {
+                if (date) {
+                  setSelectedDate(date);
                 }
               }}
+              minimumDate={new Date()}
             />
-          )}
-        />
-
-        {/* ── EMOJI PICKER MODAL ──────────── */}
-        <Modal
-          visible={showEmojiPicker}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setShowEmojiPicker(false)}
-        >
-          <View style={styles.pickerContainer}>
-            <View style={styles.pickerContent}>
-              <Text style={styles.pickerTitle}>Pick an emoji</Text>
-              <FlatList
-                data={EMOJIS}
-                keyExtractor={(e) => e}
-                numColumns={6}
-                contentContainerStyle={styles.pickerList}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.pickerItem}
-                    onPress={() => {
-                      setEmoji(item);
-                      setShowEmojiPicker(false);
-                    }}
-                  >
-                    <Text style={styles.pickerEmoji}>{item}</Text>
-                  </TouchableOpacity>
-                )}
-              />
-              <TouchableOpacity
-                style={styles.pickerClose}
-                onPress={() => setShowEmojiPicker(false)}
-              >
-                <Text style={styles.pickerCloseText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
           </View>
-        </Modal>
-
-      </View>
-
-      {/* ── ADD BUTTON ────────────────────── */}
-      <TouchableOpacity style={styles.addButton} onPress={handleSave}>
-        <Text style={styles.addButtonText}>Add Activity</Text>
-      </TouchableOpacity>
-
+          {/* ── COLOR PICKER ────────────────── */}
+          <FlatList
+            data={COLORS}
+            keyExtractor={(c) => c}
+            horizontal
+            contentContainerStyle={styles.colorList}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.colorDot,
+                  { backgroundColor: item },
+                  item === color && styles.colorDotActive,
+                ]}
+                onPress={() => {
+                  setColor(item);
+                  if (item === 'rainbow') {
+                    setEmojiBoxColor('#84AB66');
+                  } else {
+                    const hexColor = item;
+                    const r = parseInt(hexColor.slice(1,3), 16);
+                    const g = parseInt(hexColor.slice(3,5), 16);
+                    const b = parseInt(hexColor.slice(5,7), 16);
+                    const rgbaColor = `rgba(${r},${g},${b},0.8)`;
+                    setEmojiBoxColor(rgbaColor);
+                  }
+                }}
+              />
+            )}
+          />
+          {/* ── ADD BUTTON ────────────────────── */}
+          <TouchableOpacity style={styles.addButton} onPress={handleSave}>
+            <Text style={styles.addButtonText}>Add Activity</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+      {/* ── EMOJI PICKER MODAL ──────────── */}
+      <Modal
+        visible={showEmojiPicker}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowEmojiPicker(false)}
+      >
+        <View style={styles.pickerContainer}>
+          <View style={styles.pickerContent}>
+            <Text style={styles.pickerTitle}>Pick an emoji</Text>
+            <FlatList
+              data={EMOJIS}
+              keyExtractor={(e) => e}
+              numColumns={6}
+              contentContainerStyle={styles.pickerList}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.pickerItem}
+                  onPress={() => {
+                    setEmoji(item);
+                    setShowEmojiPicker(false);
+                  }}
+                >
+                  <Text style={styles.pickerEmoji}>{item}</Text>
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity
+              style={styles.pickerClose}
+              onPress={() => setShowEmojiPicker(false)}
+            >
+              <Text style={styles.pickerCloseText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       {/* ── SUNNY LEAVES FOOTER ─────────── */}
       <Image
         source={SUNNY_LEAVES}
