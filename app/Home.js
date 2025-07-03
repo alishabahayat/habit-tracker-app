@@ -55,10 +55,11 @@ const styles = StyleSheet.create({
   },
   backgroundImage2: {
     position: 'absolute',
-    top: 0,
-    left: 0,
+    top: -20,
+    left: -40,
     right: 0,
-    width: '100%',
+    width: '120%',
+    height: '120%',
     height: 238,
     opacity: 0.9,
     resizeMode: 'contain',
@@ -73,12 +74,19 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   today: {
-    color: '#4A4A4A',
-    fontSize: 14,
+    width: 78,
+    height: 35,
+    flexShrink: 0,
+    color: '#A36C44',
+    textAlign: 'center',
+    fontFamily: 'Poppins',
+    fontSize: 24,
+    fontStyle: 'normal',
+    fontWeight: '700',
+    lineHeight: 24,
+    transform: [{ translateY: 50 }],
   },
-  todayActive: {
-    color: '#84AB66',
-  },
+
   calendarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -93,6 +101,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 16,
     marginLeft: 8,
+    transform: [{ translateY: 50}],
   },
   createIcon: {
     width: 80,
@@ -115,15 +124,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#718278',
     borderRadius: 16,
     overflow: 'hidden',
-    width: '100%',
+    width: '90%',
+    marginHorizontal: 16,
   },
   arrowButton: {
-    width: 40,
-    height: 40,
+    width: 35,
+    height: 35,
     backgroundColor: '#4A4A4A',
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginHorizontal: 5,
   },
   arrow: {
     width: 24,
@@ -140,11 +151,11 @@ const styles = StyleSheet.create({
   },
   dayBoxes: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    width: '80%',
-    marginLeft: 'auto',
-    marginRight: 'auto',
+    width: '100%',
+    marginLeft: 0,
+    marginRight: 0,
   },
   dayBox: {
     width: 48,
@@ -152,7 +163,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    marginHorizontal: 4,
+    marginHorizontal: 2,
   },
   dateBackground: {
     backgroundColor: '#718278',
@@ -181,8 +192,17 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   dateText: {
-    color: '#4A4A4A',
-    fontSize: 16,
+    width: 96,
+    height: 35,
+    flexShrink: 0,
+    color: '#F2E8DA',
+    textAlign: 'center',
+    fontFamily: 'Poppins',
+    fontSize: 20,
+    fontStyle: 'normal',
+    fontWeight: '700',
+    lineHeight: 20,
+    transform: [{ translateY: 80 }, { translateX: -113 }],
   },
   addEvent: {
     height: 60,
@@ -383,12 +403,6 @@ export default function Home() {
         <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
         
         <View style={styles.calendarContainer}>
-          <TouchableOpacity onPress={goToday}>
-            <Image
-              source={require('../assets/images/calendar.png')}
-              style={styles.createIcon}
-            />
-          </TouchableOpacity>
           <TouchableOpacity style={[styles.createBtn, { backgroundColor: '#718278' }]} onPress={() => router.push('add-habit')}>
             <Text style={{ color: '#C8C8C8', fontWeight: 'bold', fontSize: 16 }}>Create Habit</Text>
           </TouchableOpacity>
@@ -400,15 +414,6 @@ export default function Home() {
       {/* 7-Day Scroller (Fixed) */}
       <View style={styles.dayScrollerWrapper}>
         <View style={styles.dayScroller}>
-          <TouchableOpacity onPress={goPrevDay} style={styles.arrowButton}>
-            <View style={styles.arrow}>
-              <Image
-                source={require('../assets/images/Next Page Button.png')}
-                style={[styles.arrowIcon, styles.arrowLeft]}
-              />
-            </View>
-          </TouchableOpacity>
-
           <View style={styles.dayBoxes}>
             {days.map((d, idx) => {
               const isToday =
@@ -433,15 +438,6 @@ export default function Home() {
               );
             })}
           </View>
-
-          <TouchableOpacity onPress={goNextDay} style={styles.arrowButton}>
-            <View style={styles.arrow}>
-              <Image
-                source={require('../assets/images/Next Page Button.png')}
-                style={styles.arrowIcon}
-              />
-            </View>
-          </TouchableOpacity>
         </View>
       </View>
 
