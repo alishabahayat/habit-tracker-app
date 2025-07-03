@@ -474,12 +474,13 @@ export default function Home() {
           />
           <View style={styles.activeDot} />
         </View>
-        <TouchableOpacity>
-          <Image
-            source={require('../assets/images/Favorite_light.png')}
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/Favorites')}>
+        <Image
+    source={require('../assets/images/Favorite_light.png')}
+    style={styles.navIcon}
+         />
+      </TouchableOpacity>
+
         <TouchableOpacity>
           <Image
             source={require('../assets/images/Question_light.png')}

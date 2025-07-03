@@ -1,22 +1,17 @@
-// app/Favorites.js
-import { View, Text, FlatList } from 'react-native';
 import { useContext } from 'react';
-import { HabitsContext } from '../_contexts/HabitsContext';
+import { FlatList, Text, View } from 'react-native';
+import { HabitsContext } from './_contexts/HabitsContext';
 
 export default function Favorites() {
   const { habits } = useContext(HabitsContext);
 
-  const favoriteHabits = habits.filter(habit => habit.isFavorite);
-
   return (
-    <View style={{ flex: 1, padding: 16 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Favorite Habits</Text>
+    <View>
+      <Text>Favorites</Text>
       <FlatList
-        data={favoriteHabits}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <Text style={{ paddingVertical: 8 }}>{item.name}</Text>
-        )}
+        data={habits.filter(h => h.favorite)}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => <Text>{item.name}</Text>}
       />
     </View>
   );
