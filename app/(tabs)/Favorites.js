@@ -1,6 +1,6 @@
 import { View, Text, FlatList } from 'react-native';
 import { useContext } from 'react';
-import { HabitsContext } from '../_contexts/HabitsContext'; // or wherever your state is stored
+import { HabitsContext } from '../_contexts/HabitsContext';
 
 export default function Favorites() {
   const { habits } = useContext(HabitsContext); // get all habits
