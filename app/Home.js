@@ -3,13 +3,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Alert,
 } from 'react-native';
 import { AuthContext } from './_contexts/AuthContext';
 
@@ -183,14 +183,17 @@ const styles = StyleSheet.create({
   dayName: {
     color: '#4A4A4A',
     fontSize: 12,
-  },
-  dayNum: {
-    color: '#4A4A4A',
-    fontSize: 14,
     fontWeight: 'bold',
   },
+  dayNum: {
+    fontFamily: 'Poppins',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#C8C8C8',
+    textAlign: 'center',
+  },
   dayNumActive: {
-    color: '#FFFFFF',
+    color: '#C8C8C8',
   },
   dateText: {
     width: 96,
@@ -275,17 +278,21 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  habitEmoji: {
-    fontSize: 24,
+  habitEmojiCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
   },
   habitEmoji: {
     fontSize: 24,
-    marginRight: 10,
-  },
-  habitEmoji: {
-    fontSize: 24,
-    marginRight: 10,
   },
   habitText: {
     fontSize: 16,
@@ -314,6 +321,27 @@ export default function Home() {
   }, []);
 
   const [habits, setHabits] = useState([]);
+  const [completedHabits, setCompletedHabits] = useState({});
+
+  // Load completed habits for this user from AsyncStorage
+  useEffect(() => {
+    if (!userId) return;
+    const loadCompleted = async () => {
+      try {
+        const data = await AsyncStorage.getItem(`completedHabits_${userId}`);
+        if (data) setCompletedHabits(JSON.parse(data));
+      } catch (e) { console.error('Failed to load completed habits', e); }
+    };
+    loadCompleted();
+  }, [userId]);
+
+  // Helper to persist completed habits
+  const persistCompletedHabits = async (updated) => {
+    if (!userId) return;
+    try {
+      await AsyncStorage.setItem(`completedHabits_${userId}` , JSON.stringify(updated));
+    } catch (e) { console.error('Failed to save completed habits', e); }
+  };
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -431,7 +459,7 @@ export default function Home() {
                       : styles.dateBackground
                   }>
                     <View style={styles.dateBoxContent}>
-                      <Text style={styles.dayName}>{d.toLocaleString('en-US', { weekday: 'short' })}</Text>
+                      <Text style={styles.dayName}>{d.toLocaleString('en-US', { weekday: 'short' }).toUpperCase()}</Text>
                       <Text style={isToday ? [styles.dayNum, styles.dayNumActive] : styles.dayNum}>{d.getDate()}</Text>
                     </View>
                   </View>
@@ -448,9 +476,34 @@ export default function Home() {
           <TouchableOpacity 
             key={habit.id} 
             style={styles.habitItem}
-            onPress={() => router.push(`/edit-habit?habitId=${habit.id}`)}
+            onPress={() => {
+              Alert.alert(
+                'Habit Options',
+                'What would you like to do?',
+                [
+                  { text: 'Edit', onPress: () => router.push(`/edit-habit?habitId=${habit.id}`) },
+                  { text: 'Complete Habit', onPress: () => {
+                    setCompletedHabits(prev => ({ ...prev, [habit.id]: true }));
+                  } },
+                  { text: 'Cancel', style: 'cancel' }
+                ]
+              );
+            }}
           >
-            <Text style={[styles.habitEmoji, { color: habit.color }]}>{habit.emoji}</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setCompletedHabits(prev => {
+                  const updated = { ...prev, [habit.id]: !prev[habit.id] };
+                  persistCompletedHabits(updated);
+                  return updated;
+                });
+              }}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.habitEmojiCircle, { backgroundColor: habit.color }]}> 
+                <Text style={styles.habitEmoji}>{completedHabits[habit.id] ? '✔️' : habit.emoji}</Text>
+              </View>
+            </TouchableOpacity>
             <Text style={styles.habitText}>{habit.name}</Text>
           </TouchableOpacity>
         ))}
