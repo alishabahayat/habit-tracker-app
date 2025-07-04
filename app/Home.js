@@ -12,6 +12,8 @@ import {
   View,
 } from 'react-native';
 import { AuthContext } from './_contexts/AuthContext';
+import { markHabitCompleted, unmarkHabitCompleted, isHabitCompleted } from './_helpers/completions';
+import { useMemo } from 'react';
 
 // Helper function to format date as "Jul 9"
 function formatDate(d) {
@@ -24,6 +26,72 @@ function formatDate(d) {
 // assets
 const BACKGROUND_IMAGE_1 = require('../assets/images/background image 1.png');
 const BACKGROUND_IMAGE_2 = require('../assets/images/background image 2.png');
+
+// ---
+// HabitItem component for unified completion logic
+
+function HabitItem({ habit, selectedDate, onEdit, refreshHabits }) {
+  const [completed, setCompleted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  // Always use a stable date string as key
+  const dateKey = selectedDate instanceof Date ? selectedDate.toISOString().split('T')[0] : selectedDate;
+
+  useEffect(() => {
+    let mounted = true;
+    async function check() {
+      setLoading(true);
+      const isDone = await isHabitCompleted(habit.id, dateKey);
+      if (mounted) {
+        setCompleted(isDone);
+      }
+      setLoading(false);
+    }
+    check();
+    return () => { mounted = false; };
+  }, [habit.id, dateKey]);
+
+  const handleToggle = async () => {
+    setLoading(true);
+    if (completed) {
+      await unmarkHabitCompleted(habit.id, dateKey);
+    } else {
+      await markHabitCompleted(habit.id, dateKey);
+    }
+    // Always re-check from storage
+    const isDone = await isHabitCompleted(habit.id, dateKey);
+    if (completed !== isDone) setCompleted(isDone);
+    setLoading(false);
+    if (refreshHabits) refreshHabits(); // trigger parent refresh if needed
+  };
+
+  return (
+    <TouchableOpacity
+      style={styles.habitItem}
+      onPress={() => {
+        Alert.alert(
+          'Habit Options',
+          'What would you like to do?',
+          [
+            { text: 'Edit', onPress: onEdit },
+            { text: completed ? 'Unmark Complete' : 'Complete Habit', onPress: handleToggle },
+            { text: 'Cancel', style: 'cancel' }
+          ]
+        );
+      }}
+    >
+      <TouchableOpacity
+        onPress={handleToggle}
+        activeOpacity={0.7}
+        disabled={loading}
+      >
+        <View style={[styles.habitEmojiCircle, { backgroundColor: habit.color }]}> 
+          <Text style={styles.habitEmoji}>{completed ? '✔️' : habit.emoji}</Text>
+        </View>
+      </TouchableOpacity>
+      <Text style={styles.habitText}>{habit.name}</Text>
+    </TouchableOpacity>
+  );
+}
 
 // Styles
 const styles = StyleSheet.create({
@@ -321,30 +389,12 @@ export default function Home() {
   }, []);
 
   const [habits, setHabits] = useState([]);
-  const [completedHabits, setCompletedHabits] = useState({});
+  // Removed completedHabits state; use isHabitCompleted for UI
 
   // Helper to format date as YYYY-MM-DD
   const getDateKey = (date) => date.toISOString().split('T')[0];
 
-  // Load completed habits for this user from AsyncStorage
-  useEffect(() => {
-    if (!userId) return;
-    const loadCompleted = async () => {
-      try {
-        const data = await AsyncStorage.getItem(`completedHabits_${userId}`);
-        if (data) setCompletedHabits(JSON.parse(data));
-      } catch (e) { console.error('Failed to load completed habits', e); }
-    };
-    loadCompleted();
-  }, [userId]);
-
-  // Helper to persist completed habits
-  const persistCompletedHabits = async (updated) => {
-    if (!userId) return;
-    try {
-      await AsyncStorage.setItem(`completedHabits_${userId}` , JSON.stringify(updated));
-    } catch (e) { console.error('Failed to save completed habits', e); }
-  };
+  // Removed per-user completedHabits storage and persistence logic. Use global helpers instead.
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -498,64 +548,13 @@ export default function Home() {
           // Custom - fallback to daily
           return false;
         }).map((habit, index) => (
-          <TouchableOpacity 
-            key={habit.id} 
-            style={styles.habitItem}
-            onPress={() => {
-              Alert.alert(
-                'Habit Options',
-                'What would you like to do?',
-                [
-                  { text: 'Edit', onPress: () => router.push(`/edit-habit?habitId=${habit.id}`) },
-                  { text: 'Complete Habit', onPress: () => {
-                    setCompletedHabits(prev => {
-                      const dateKey = getDateKey(selectedDate);
-                      const prevDates = prev[habit.id] || [];
-                      let updated;
-                      if (Array.isArray(prevDates)) {
-                        if (!prevDates.includes(dateKey)) {
-                          updated = { ...prev, [habit.id]: [...prevDates, dateKey] };
-                        } else {
-                          updated = prev; // already completed for this date
-                        }
-                      } else {
-                        // Defensive: if not array, replace with array
-                        updated = { ...prev, [habit.id]: [dateKey] };
-                      }
-                      persistCompletedHabits(updated);
-                      return updated;
-                    });
-                  } },
-                  { text: 'Cancel', style: 'cancel' }
-                ]
-              );
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => {
-                setCompletedHabits(prev => {
-                  const dateKey = getDateKey(selectedDate);
-                  const prevDates = prev[habit.id] || [];
-                  let updated;
-                  if (prevDates.includes(dateKey)) {
-                    // Uncheck for this date
-                    updated = { ...prev, [habit.id]: prevDates.filter(d => d !== dateKey) };
-                  } else {
-                    // Check for this date
-                    updated = { ...prev, [habit.id]: [...prevDates, dateKey] };
-                  }
-                  persistCompletedHabits(updated);
-                  return updated;
-                });
-              }}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.habitEmojiCircle, { backgroundColor: habit.color }]}> 
-                <Text style={styles.habitEmoji}>{(completedHabits[habit.id] || []).includes(getDateKey(selectedDate)) ? '✔️' : habit.emoji}</Text>
-              </View>
-            </TouchableOpacity>
-            <Text style={styles.habitText}>{habit.name}</Text>
-          </TouchableOpacity>
+          <HabitItem
+            key={habit.id}
+            habit={habit}
+            selectedDate={selectedDate}
+            onEdit={() => router.push(`/edit-habit?habitId=${habit.id}`)}
+            refreshHabits={fetchHabits}
+          />
         ))}
         {habits.filter(habit => {
           // Default to showing if no frequency set
@@ -599,17 +598,7 @@ export default function Home() {
           />
           <View style={styles.activeDot} />
         </View>
-<<<<<<< HEAD
         <TouchableOpacity onPress={() => router.push('/Streaks')}>
-        <Image
-    source={require('../assets/images/Favorite_light.png')}
-    style={styles.navIcon}
-         />
-      </TouchableOpacity>
-
-        <TouchableOpacity>
-=======
-        <TouchableOpacity>
           <Image
             source={require('../assets/images/Favorite_light.png')}
             style={styles.navIcon}
@@ -632,7 +621,6 @@ export default function Home() {
             ]
           );
         }}>
->>>>>>> origin/main
           <Image
             source={require('../assets/images/Question_light.png')}
             style={styles.navIcon}
@@ -642,6 +630,3 @@ export default function Home() {
     </View>
   );
 }
-
-
-
