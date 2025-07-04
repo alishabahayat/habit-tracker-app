@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -55,10 +56,11 @@ const styles = StyleSheet.create({
   },
   backgroundImage2: {
     position: 'absolute',
-    top: 0,
-    left: 0,
+    top: -20,
+    left: -40,
     right: 0,
-    width: '100%',
+    width: '120%',
+    height: '120%',
     height: 238,
     opacity: 0.9,
     resizeMode: 'contain',
@@ -73,12 +75,19 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   today: {
-    color: '#4A4A4A',
-    fontSize: 14,
+    width: 78,
+    height: 35,
+    flexShrink: 0,
+    color: '#A36C44',
+    textAlign: 'center',
+    fontFamily: 'Poppins',
+    fontSize: 24,
+    fontStyle: 'normal',
+    fontWeight: '700',
+    lineHeight: 24,
+    transform: [{ translateY: 50 }],
   },
-  todayActive: {
-    color: '#84AB66',
-  },
+
   calendarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -93,6 +102,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 16,
     marginLeft: 8,
+    transform: [{ translateY: 50}],
   },
   createIcon: {
     width: 80,
@@ -115,15 +125,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#718278',
     borderRadius: 16,
     overflow: 'hidden',
-    width: '100%',
+    width: '90%',
+    marginHorizontal: 16,
   },
   arrowButton: {
-    width: 40,
-    height: 40,
+    width: 35,
+    height: 35,
     backgroundColor: '#4A4A4A',
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginHorizontal: 5,
   },
   arrow: {
     width: 24,
@@ -140,11 +152,11 @@ const styles = StyleSheet.create({
   },
   dayBoxes: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    width: '80%',
-    marginLeft: 'auto',
-    marginRight: 'auto',
+    width: '100%',
+    marginLeft: 0,
+    marginRight: 0,
   },
   dayBox: {
     width: 48,
@@ -152,7 +164,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    marginHorizontal: 4,
+    marginHorizontal: 2,
   },
   dateBackground: {
     backgroundColor: '#718278',
@@ -171,18 +183,30 @@ const styles = StyleSheet.create({
   dayName: {
     color: '#4A4A4A',
     fontSize: 12,
-  },
-  dayNum: {
-    color: '#4A4A4A',
-    fontSize: 14,
     fontWeight: 'bold',
   },
+  dayNum: {
+    fontFamily: 'Poppins',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#C8C8C8',
+    textAlign: 'center',
+  },
   dayNumActive: {
-    color: '#FFFFFF',
+    color: '#C8C8C8',
   },
   dateText: {
-    color: '#4A4A4A',
-    fontSize: 16,
+    width: 96,
+    height: 35,
+    flexShrink: 0,
+    color: '#F2E8DA',
+    textAlign: 'center',
+    fontFamily: 'Poppins',
+    fontSize: 20,
+    fontStyle: 'normal',
+    fontWeight: '700',
+    lineHeight: 20,
+    transform: [{ translateY: 80 }, { translateX: -113 }],
   },
   addEvent: {
     height: 60,
@@ -254,17 +278,21 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  habitEmoji: {
-    fontSize: 24,
+  habitEmojiCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
   },
   habitEmoji: {
     fontSize: 24,
-    marginRight: 10,
-  },
-  habitEmoji: {
-    fontSize: 24,
-    marginRight: 10,
   },
   habitText: {
     fontSize: 16,
@@ -293,6 +321,30 @@ export default function Home() {
   }, []);
 
   const [habits, setHabits] = useState([]);
+  const [completedHabits, setCompletedHabits] = useState({});
+
+  // Helper to format date as YYYY-MM-DD
+  const getDateKey = (date) => date.toISOString().split('T')[0];
+
+  // Load completed habits for this user from AsyncStorage
+  useEffect(() => {
+    if (!userId) return;
+    const loadCompleted = async () => {
+      try {
+        const data = await AsyncStorage.getItem(`completedHabits_${userId}`);
+        if (data) setCompletedHabits(JSON.parse(data));
+      } catch (e) { console.error('Failed to load completed habits', e); }
+    };
+    loadCompleted();
+  }, [userId]);
+
+  // Helper to persist completed habits
+  const persistCompletedHabits = async (updated) => {
+    if (!userId) return;
+    try {
+      await AsyncStorage.setItem(`completedHabits_${userId}` , JSON.stringify(updated));
+    } catch (e) { console.error('Failed to save completed habits', e); }
+  };
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -380,35 +432,20 @@ export default function Home() {
             Today
           </Text>
         </TouchableOpacity>
-        <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
+        <Text style={styles.dateText}>{formatDate(new Date())}</Text>
         
         <View style={styles.calendarContainer}>
-          <TouchableOpacity onPress={goToday}>
-            <Image
-              source={require('../assets/images/calendar.png')}
-              style={styles.createIcon}
-            />
-          </TouchableOpacity>
           <TouchableOpacity style={[styles.createBtn, { backgroundColor: '#718278' }]} onPress={() => router.push('add-habit')}>
             <Text style={{ color: '#C8C8C8', fontWeight: 'bold', fontSize: 16 }}>Create Habit</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <Text style={styles.greeting}>Hello, Charlie</Text>
+      <Text style={styles.greeting}>Hello{user?.name ? `, ${user.name}` : ''}!</Text>
 
       {/* 7-Day Scroller (Fixed) */}
       <View style={styles.dayScrollerWrapper}>
         <View style={styles.dayScroller}>
-          <TouchableOpacity onPress={goPrevDay} style={styles.arrowButton}>
-            <View style={styles.arrow}>
-              <Image
-                source={require('../assets/images/Next Page Button.png')}
-                style={[styles.arrowIcon, styles.arrowLeft]}
-              />
-            </View>
-          </TouchableOpacity>
-
           <View style={styles.dayBoxes}>
             {days.map((d, idx) => {
               const isToday =
@@ -425,7 +462,7 @@ export default function Home() {
                       : styles.dateBackground
                   }>
                     <View style={styles.dateBoxContent}>
-                      <Text style={styles.dayName}>{d.toLocaleString('en-US', { weekday: 'short' })}</Text>
+                      <Text style={styles.dayName}>{d.toLocaleString('en-US', { weekday: 'short' }).toUpperCase()}</Text>
                       <Text style={isToday ? [styles.dayNum, styles.dayNumActive] : styles.dayNum}>{d.getDate()}</Text>
                     </View>
                   </View>
@@ -433,30 +470,118 @@ export default function Home() {
               );
             })}
           </View>
-
-          <TouchableOpacity onPress={goNextDay} style={styles.arrowButton}>
-            <View style={styles.arrow}>
-              <Image
-                source={require('../assets/images/Next Page Button.png')}
-                style={styles.arrowIcon}
-              />
-            </View>
-          </TouchableOpacity>
         </View>
       </View>
 
       {/* Habits List (Scrollable) */}
       <ScrollView style={styles.habitsScroll} contentContainerStyle={styles.habitsContainer}>
-        {habits.map((habit, index) => (
+        {habits.filter(habit => {
+          // Default to showing if no frequency set
+          if (!habit.frequency || !habit.frequency.type) return true;
+          const freq = habit.frequency;
+          const d = selectedDate;
+          // Daily
+          if (freq.type === 'daily') return true;
+          // Weekly
+          if (freq.type === 'weekly' && freq.daysOfWeek && Array.isArray(freq.daysOfWeek)) {
+            // JS: Sunday=0, ..., Saturday=6
+            return freq.daysOfWeek.includes(d.getDay());
+          }
+          // Monthly
+          if (freq.type === 'monthly' && freq.daysOfMonth && Array.isArray(freq.daysOfMonth)) {
+            return freq.daysOfMonth.includes(d.getDate());
+          }
+          // Yearly
+          if (freq.type === 'yearly' && freq.monthsOfYear && Array.isArray(freq.monthsOfYear)) {
+            return freq.monthsOfYear.includes(d.getMonth()+1) && freq.daysOfMonth && freq.daysOfMonth.includes(d.getDate());
+          }
+          // Custom - fallback to daily
+          return false;
+        }).map((habit, index) => (
           <TouchableOpacity 
             key={habit.id} 
             style={styles.habitItem}
-            onPress={() => router.push(`/edit-habit?habitId=${habit.id}`)}
+            onPress={() => {
+              Alert.alert(
+                'Habit Options',
+                'What would you like to do?',
+                [
+                  { text: 'Edit', onPress: () => router.push(`/edit-habit?habitId=${habit.id}`) },
+                  { text: 'Complete Habit', onPress: () => {
+                    setCompletedHabits(prev => {
+                      const dateKey = getDateKey(selectedDate);
+                      const prevDates = prev[habit.id] || [];
+                      let updated;
+                      if (Array.isArray(prevDates)) {
+                        if (!prevDates.includes(dateKey)) {
+                          updated = { ...prev, [habit.id]: [...prevDates, dateKey] };
+                        } else {
+                          updated = prev; // already completed for this date
+                        }
+                      } else {
+                        // Defensive: if not array, replace with array
+                        updated = { ...prev, [habit.id]: [dateKey] };
+                      }
+                      persistCompletedHabits(updated);
+                      return updated;
+                    });
+                  } },
+                  { text: 'Cancel', style: 'cancel' }
+                ]
+              );
+            }}
           >
-            <Text style={[styles.habitEmoji, { color: habit.color }]}>{habit.emoji}</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setCompletedHabits(prev => {
+                  const dateKey = getDateKey(selectedDate);
+                  const prevDates = prev[habit.id] || [];
+                  let updated;
+                  if (prevDates.includes(dateKey)) {
+                    // Uncheck for this date
+                    updated = { ...prev, [habit.id]: prevDates.filter(d => d !== dateKey) };
+                  } else {
+                    // Check for this date
+                    updated = { ...prev, [habit.id]: [...prevDates, dateKey] };
+                  }
+                  persistCompletedHabits(updated);
+                  return updated;
+                });
+              }}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.habitEmojiCircle, { backgroundColor: habit.color }]}> 
+                <Text style={styles.habitEmoji}>{(completedHabits[habit.id] || []).includes(getDateKey(selectedDate)) ? '✔️' : habit.emoji}</Text>
+              </View>
+            </TouchableOpacity>
             <Text style={styles.habitText}>{habit.name}</Text>
           </TouchableOpacity>
         ))}
+        {habits.filter(habit => {
+          // Default to showing if no frequency set
+          if (!habit.frequency || !habit.frequency.type) return true;
+          const freq = habit.frequency;
+          const d = selectedDate;
+          // Daily
+          if (freq.type === 'daily') return true;
+          // Weekly
+          if (freq.type === 'weekly' && freq.daysOfWeek && Array.isArray(freq.daysOfWeek)) {
+            // JS: Sunday=0, ..., Saturday=6
+            return freq.daysOfWeek.includes(d.getDay());
+          }
+          // Monthly
+          if (freq.type === 'monthly' && freq.daysOfMonth && Array.isArray(freq.daysOfMonth)) {
+            return freq.daysOfMonth.includes(d.getDate());
+          }
+          // Yearly
+          if (freq.type === 'yearly' && freq.monthsOfYear && Array.isArray(freq.monthsOfYear)) {
+            return freq.monthsOfYear.includes(d.getMonth()+1) && freq.daysOfMonth && freq.daysOfMonth.includes(d.getDate());
+          }
+          // Custom - fallback to daily
+          return false;
+        }).length === 0 && (
+          <Text style={{ color: '#888', textAlign: 'center', marginTop: 30 }}>No habits scheduled for this day.</Text>
+        )}
       </ScrollView>
 
       {/* Add Event Button */}
@@ -474,6 +599,7 @@ export default function Home() {
           />
           <View style={styles.activeDot} />
         </View>
+<<<<<<< HEAD
         <TouchableOpacity onPress={() => router.push('/Streaks')}>
         <Image
     source={require('../assets/images/Favorite_light.png')}
@@ -482,6 +608,31 @@ export default function Home() {
       </TouchableOpacity>
 
         <TouchableOpacity>
+=======
+        <TouchableOpacity>
+          <Image
+            source={require('../assets/images/Favorite_light.png')}
+            style={styles.navIcon}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          Alert.alert(
+            'Log Out',
+            'Are you sure you want to log out?',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Yes',
+                style: 'destructive',
+                onPress: async () => {
+                  await authContext.signOut();
+                  router.replace('/Login');
+                }
+              }
+            ]
+          );
+        }}>
+>>>>>>> origin/main
           <Image
             source={require('../assets/images/Question_light.png')}
             style={styles.navIcon}
