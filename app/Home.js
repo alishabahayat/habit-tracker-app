@@ -472,7 +472,29 @@ export default function Home() {
 
       {/* Habits List (Scrollable) */}
       <ScrollView style={styles.habitsScroll} contentContainerStyle={styles.habitsContainer}>
-        {habits.map((habit, index) => (
+        {habits.filter(habit => {
+          // Default to showing if no frequency set
+          if (!habit.frequency || !habit.frequency.type) return true;
+          const freq = habit.frequency;
+          const d = selectedDate;
+          // Daily
+          if (freq.type === 'daily') return true;
+          // Weekly
+          if (freq.type === 'weekly' && freq.daysOfWeek && Array.isArray(freq.daysOfWeek)) {
+            // JS: Sunday=0, ..., Saturday=6
+            return freq.daysOfWeek.includes(d.getDay());
+          }
+          // Monthly
+          if (freq.type === 'monthly' && freq.daysOfMonth && Array.isArray(freq.daysOfMonth)) {
+            return freq.daysOfMonth.includes(d.getDate());
+          }
+          // Yearly
+          if (freq.type === 'yearly' && freq.monthsOfYear && Array.isArray(freq.monthsOfYear)) {
+            return freq.monthsOfYear.includes(d.getMonth()+1) && freq.daysOfMonth && freq.daysOfMonth.includes(d.getDate());
+          }
+          // Custom - fallback to daily
+          return false;
+        }).map((habit, index) => (
           <TouchableOpacity 
             key={habit.id} 
             style={styles.habitItem}
@@ -507,6 +529,31 @@ export default function Home() {
             <Text style={styles.habitText}>{habit.name}</Text>
           </TouchableOpacity>
         ))}
+        {habits.filter(habit => {
+          // Default to showing if no frequency set
+          if (!habit.frequency || !habit.frequency.type) return true;
+          const freq = habit.frequency;
+          const d = selectedDate;
+          // Daily
+          if (freq.type === 'daily') return true;
+          // Weekly
+          if (freq.type === 'weekly' && freq.daysOfWeek && Array.isArray(freq.daysOfWeek)) {
+            // JS: Sunday=0, ..., Saturday=6
+            return freq.daysOfWeek.includes(d.getDay());
+          }
+          // Monthly
+          if (freq.type === 'monthly' && freq.daysOfMonth && Array.isArray(freq.daysOfMonth)) {
+            return freq.daysOfMonth.includes(d.getDate());
+          }
+          // Yearly
+          if (freq.type === 'yearly' && freq.monthsOfYear && Array.isArray(freq.monthsOfYear)) {
+            return freq.monthsOfYear.includes(d.getMonth()+1) && freq.daysOfMonth && freq.daysOfMonth.includes(d.getDate());
+          }
+          // Custom - fallback to daily
+          return false;
+        }).length === 0 && (
+          <Text style={{ color: '#888', textAlign: 'center', marginTop: 30 }}>No habits scheduled for this day.</Text>
+        )}
       </ScrollView>
 
       {/* Add Event Button */}
