@@ -323,6 +323,9 @@ export default function Home() {
   const [habits, setHabits] = useState([]);
   const [completedHabits, setCompletedHabits] = useState({});
 
+  // Helper to format date as YYYY-MM-DD
+  const getDateKey = (date) => date.toISOString().split('T')[0];
+
   // Load completed habits for this user from AsyncStorage
   useEffect(() => {
     if (!userId) return;
@@ -429,7 +432,7 @@ export default function Home() {
             Today
           </Text>
         </TouchableOpacity>
-        <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
+        <Text style={styles.dateText}>{formatDate(new Date())}</Text>
         
         <View style={styles.calendarContainer}>
           <TouchableOpacity style={[styles.createBtn, { backgroundColor: '#718278' }]} onPress={() => router.push('add-habit')}>
@@ -438,7 +441,7 @@ export default function Home() {
         </View>
       </View>
 
-      <Text style={styles.greeting}>Hello, Charlie</Text>
+      <Text style={styles.greeting}>Hello{user?.name ? `, ${user.name}` : ''}!</Text>
 
       {/* 7-Day Scroller (Fixed) */}
       <View style={styles.dayScrollerWrapper}>
@@ -505,7 +508,23 @@ export default function Home() {
                 [
                   { text: 'Edit', onPress: () => router.push(`/edit-habit?habitId=${habit.id}`) },
                   { text: 'Complete Habit', onPress: () => {
-                    setCompletedHabits(prev => ({ ...prev, [habit.id]: true }));
+                    setCompletedHabits(prev => {
+                      const dateKey = getDateKey(selectedDate);
+                      const prevDates = prev[habit.id] || [];
+                      let updated;
+                      if (Array.isArray(prevDates)) {
+                        if (!prevDates.includes(dateKey)) {
+                          updated = { ...prev, [habit.id]: [...prevDates, dateKey] };
+                        } else {
+                          updated = prev; // already completed for this date
+                        }
+                      } else {
+                        // Defensive: if not array, replace with array
+                        updated = { ...prev, [habit.id]: [dateKey] };
+                      }
+                      persistCompletedHabits(updated);
+                      return updated;
+                    });
                   } },
                   { text: 'Cancel', style: 'cancel' }
                 ]
@@ -515,7 +534,16 @@ export default function Home() {
             <TouchableOpacity
               onPress={() => {
                 setCompletedHabits(prev => {
-                  const updated = { ...prev, [habit.id]: !prev[habit.id] };
+                  const dateKey = getDateKey(selectedDate);
+                  const prevDates = prev[habit.id] || [];
+                  let updated;
+                  if (prevDates.includes(dateKey)) {
+                    // Uncheck for this date
+                    updated = { ...prev, [habit.id]: prevDates.filter(d => d !== dateKey) };
+                  } else {
+                    // Check for this date
+                    updated = { ...prev, [habit.id]: [...prevDates, dateKey] };
+                  }
                   persistCompletedHabits(updated);
                   return updated;
                 });
@@ -523,7 +551,7 @@ export default function Home() {
               activeOpacity={0.7}
             >
               <View style={[styles.habitEmojiCircle, { backgroundColor: habit.color }]}> 
-                <Text style={styles.habitEmoji}>{completedHabits[habit.id] ? '✔️' : habit.emoji}</Text>
+                <Text style={styles.habitEmoji}>{(completedHabits[habit.id] || []).includes(getDateKey(selectedDate)) ? '✔️' : habit.emoji}</Text>
               </View>
             </TouchableOpacity>
             <Text style={styles.habitText}>{habit.name}</Text>
