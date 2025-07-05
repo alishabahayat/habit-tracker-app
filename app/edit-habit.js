@@ -13,7 +13,8 @@ import {
 } from 'react-native';
 import { addHabit, updateHabit, deleteHabit } from './_helpers/database';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { AuthContext, HabitsContext } from './_contexts';
+import { AuthContext } from './_contexts/AuthContext';
+import { HabitsContext } from './_contexts/HabitsContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // assets
