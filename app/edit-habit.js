@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { addHabit, updateHabit, deleteHabit } from './_helpers/database';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { AuthContext } from './_contexts/AuthContext';
+import { AuthContext, HabitsContext } from './_contexts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // assets
@@ -269,6 +269,7 @@ export default function EditHabit() {
   }
   const authContext = useContext(AuthContext);
   const { userId } = authContext.user || {};
+  const { setHabits } = useContext(HabitsContext);
   if (!habitId) {
     return (
       <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
@@ -344,6 +345,9 @@ export default function EditHabit() {
           onPress: async () => {
             try {
               await deleteHabit(habitId);
+              // Load updated habits from AsyncStorage and update context
+              const updatedHabits = JSON.parse(await AsyncStorage.getItem('habits') || '[]');
+              setHabits(updatedHabits);
               router.back();
             } catch (error) {
               console.error('Error deleting habit:', error);

@@ -12,8 +12,7 @@ import {
   View,
 } from 'react-native';
 import { AuthContext } from './_contexts/AuthContext';
-import { markHabitCompleted, unmarkHabitCompleted, isHabitCompleted } from './_helpers/completions';
-import { useMemo } from 'react';
+import { isHabitCompleted, markHabitCompleted, unmarkHabitCompleted } from './_helpers/completions';
 
 // Helper function to format date as "Jul 9"
 function formatDate(d) {
@@ -41,7 +40,7 @@ function HabitItem({ habit, selectedDate, onEdit, refreshHabits }) {
     async function check() {
       setLoading(true);
       const isDone = await isHabitCompleted(habit.id, dateKey);
-      if (mounted) {
+      if (mounted && completed !== isDone) {
         setCompleted(isDone);
       }
       setLoading(false);

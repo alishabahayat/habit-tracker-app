@@ -49,7 +49,7 @@ useFocusEffect(
       const streakData = await Promise.all(
         userHabits.map(async (habit) => {
           const completions = await getCompletionsForHabit(habit.id);
-          const streaks = calculateStreaks(completions);
+          const streaks = calculateStreaks(completions, habit.frequency);
           return {
             ...habit,
             currentStreak: streaks.current,
