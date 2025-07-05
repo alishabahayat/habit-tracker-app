@@ -38,7 +38,7 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/images/leaves.png')} style={styles.leaves} />
+      <Image source={require('../assets/images/logo.png')} style={styles.leaves} />
       <Text style={styles.title}>Welcome Back</Text>
       <TextInput
         style={styles.input}
@@ -61,7 +61,7 @@ export default function Login() {
         <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Image source={require('../assets/images/Next Page Button.png')} style={styles.nextButton} />
+        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, textAlign: 'center', width: '100%' }}>Sign In</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push('/SignUp')}>
         <Text style={styles.signUpText}>Don't have an account? Sign up</Text>
