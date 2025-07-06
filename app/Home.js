@@ -597,13 +597,14 @@ export default function Home() {
           />
           <View style={styles.activeDot} />
         </View>
-<<<<<<<<< Temporary merge branch 1
-        <TouchableOpacity>
-          <Image
-            source={require('../assets/images/Favorite_light.png')}
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push('Streaks')}>
+  <Image
+    source={require('../assets/images/Favorite_light.png')}
+    style={styles.navIcon}
+  />
+</TouchableOpacity>
+
         <TouchableOpacity onPress={() => {
           Alert.alert(
             'Log Out',
