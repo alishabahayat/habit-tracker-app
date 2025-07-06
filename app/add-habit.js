@@ -381,6 +381,14 @@ export default function AddHabit() {
       await AsyncStorage.setItem('habits', JSON.stringify(existingHabits));
       console.log('Habits saved to storage successfully');
 
+      // Update HabitsContext if available
+      if (typeof window !== 'undefined') {
+        // Web: find global context
+        const globalCtx = window.__REACT_DEVTOOLS_GLOBAL_HOOK__ && window.__REACT_DEVTOOLS_GLOBAL_HOOK__.reactDevtoolsAgent;
+        if (globalCtx && globalCtx.setHabits) globalCtx.setHabits(existingHabits);
+      }
+      if (typeof setHabits === 'function') setHabits(existingHabits);
+
       router.back();
     } catch (error) {
       console.error('Error adding habit:', error);
