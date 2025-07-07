@@ -29,7 +29,7 @@ export default function Login() {
         await AsyncStorage.setItem('userId', user.id);
         router.push('/Welcome');
       } else {
-        Alert.alert('Error', 'Invalid username or password');
+        Alert.alert('Error', 'Invalid email or password');
       }
     } catch (error) {
       Alert.alert('Error', error.message);
@@ -42,7 +42,7 @@ export default function Login() {
       <Text style={styles.title}>Welcome Back</Text>
       <TextInput
         style={styles.input}
-        placeholder="Username"
+        placeholder="Email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
