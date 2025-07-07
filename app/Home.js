@@ -104,6 +104,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 57,
   },
+  habitHighlight: {
+    color: '#A36C44',
+    fontWeight: '700',
+  },
   habitsScroll: {
     flex: 1,
     marginBottom: 16,
@@ -498,9 +502,13 @@ export default function Home() {
         <Text style={styles.dateText}>{formatDate(new Date())}</Text>
         
         <View style={styles.calendarContainer}>
-          <TouchableOpacity style={[styles.createBtn, { backgroundColor: '#718278' }]} onPress={() => router.push('add-habit')}>
-            <Text style={{ color: '#C8C8C8', fontWeight: 'bold', fontSize: 16 }}>Create Habit</Text>
-          </TouchableOpacity>
+        <TouchableOpacity style={[styles.createBtn, { backgroundColor: '#718278' }]} onPress={() => router.push('add-habit')}>
+  <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+    <Text style={{ color: '#C8C8C8' }}>Create </Text>
+    <Text style={{ color: '#A36C44' }}>Habit</Text>
+  </Text>
+</TouchableOpacity>
+
         </View>
       </View>
 
