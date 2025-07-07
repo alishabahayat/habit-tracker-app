@@ -47,6 +47,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#96AA9F',
     padding: 20,
   },
+  habitHighlight: {
+    color: '#A36C44',
+    fontWeight: '700',
+  },
+  
   centeredContent: {
     flex: 1,
     justifyContent: 'center',
@@ -83,7 +88,7 @@ const styles = StyleSheet.create({
     color: '#F5F0EE',
   },
   headerAccent: {
-    color: '#84AB66',
+    color: '#A36C44',
   },
   whatRow: {
     flexDirection: 'row',
@@ -345,7 +350,7 @@ export default function EditHabit() {
 
   const handleSave = async () => {
     if (!activity.trim()) {
-      Alert.alert('Error', 'Please enter an activity name');
+      Alert.alert('Error', 'Please enter a habit name');
       return;
     }
 
@@ -453,7 +458,7 @@ export default function EditHabit() {
 
         <TextInput
           style={[styles.input, { borderColor: emojiBoxColor }]}
-          placeholder="Enter activity name…"
+          placeholder="Enter habit name…"
           value={activity}
           onChangeText={setActivity}
         />
