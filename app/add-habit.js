@@ -16,7 +16,7 @@ import {
   View,
 } from 'react-native';
 import { AuthContext } from './_contexts/AuthContext';
-
+import { HabitsContext } from './_contexts/HabitsContext';
 // assets
 const X_BUTTON = require('../assets/images/X Button.png');
 const SUNNY_LEAVES = require('../assets/images/sunny leaves.png');
@@ -315,6 +315,7 @@ export default function AddHabit() {
   const router = useRouter();
   const authContext = useContext(AuthContext);
   const { id: userId } = authContext.user || {};
+  const { setHabits } = useContext(HabitsContext);
 
   const [activity, setActivity] = useState('');
   const [emoji, setEmoji] = useState('😀');
@@ -384,6 +385,8 @@ export default function AddHabit() {
 
       // Save to AsyncStorage
       await AsyncStorage.setItem('habits', JSON.stringify(existingHabits));
+      setHabits(existingHabits);
+      router.back();
       console.log('Habits saved to storage successfully');
 
       // Update HabitsContext if available

@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { AuthContext } from './_contexts/AuthContext';
+import { HabitsContext } from './_contexts/HabitsContext';
 import { isHabitCompleted, markHabitCompleted, unmarkHabitCompleted } from './_helpers/completions';
 
 // Helper function to format date as "Jul 9"
@@ -370,8 +371,11 @@ const styles = StyleSheet.create({
 export default function Home() {
   const router = useRouter();
   const authContext = useContext(AuthContext);
+  const { habits, setHabits } = useContext(HabitsContext);
   const { user } = authContext;
   const [userId, setUserId] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [currentDate, setCurrentDate]   = useState(new Date());
 
   useEffect(() => {
     // Load user ID from AsyncStorage
@@ -387,23 +391,23 @@ export default function Home() {
     loadUserId();
   }, []);
 
-  const [habits, setHabits] = useState([]);
+  //const [habits, setHabits] = useState([]);
   // Removed completedHabits state; use isHabitCompleted for UI
 
   // Helper to format date as YYYY-MM-DD
-  const getDateKey = (date) => date.toISOString().split('T')[0];
+  //const getDateKey = (date) => date.toISOString().split('T')[0];
 
   // Removed per-user completedHabits storage and persistence logic. Use global helpers instead.
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [currentDate, setCurrentDate] = useState(new Date());
+  //const [selectedDate, setSelectedDate] = useState(new Date());
+  //const [currentDate, setCurrentDate] = useState(new Date());
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (userId) {
       fetchHabits();
     }
-  }, [userId]);
+  }, [userId]);*/
 
-  const fetchHabits = async () => {
+  /*const fetchHabits = async () => {
     try {
       console.log('Starting to fetch habits');
       console.log('Current userId:', userId);
@@ -432,7 +436,17 @@ export default function Home() {
       console.error('Error details:', error.message);
       setHabits([]); // Clear habits on error
     }
-  };
+  };*/
+  async function fetchHabits() {
+  try {
+    const raw   = await AsyncStorage.getItem('habits');
+    const all   = raw ? JSON.parse(raw) : [];
+    const me    = all.filter(h => h.user_id === userId);
+    setHabits(me);
+  } catch (err) {
+    console.error('fetchHabits failed', err);
+  }
+  }
 
   useEffect(() => {
     console.log('User state changed:', authContext.user);
@@ -537,29 +551,38 @@ export default function Home() {
             return false;
           }
           
-          // Default to showing if no frequency set
-          if (!habit.frequency || !habit.frequency.type) return true;
-          const freq = habit.frequency;
-          const d = selectedDate;
-          
-          // Daily
-          if (freq.type === 'daily') return true;
-          // Weekly
-          if (freq.type === 'weekly' && freq.daysOfWeek && Array.isArray(freq.daysOfWeek)) {
-            // JS: Sunday=0, ..., Saturday=6
-            return freq.daysOfWeek.includes(d.getDay());
+          const { type, interval, daysOfWeek, daysOfMonth, monthsOfYear, dayOfMonth } = habit.frequency || {}
+          const diffMs = sel - start
+          const diffDays = Math.floor(diffMs / (1000*60*60*24))
+          const diffWeeks = Math.floor(diffDays / 7)
+          const diffMonths = (sel.getFullYear() - start.getFullYear()) * 12 + (sel.getMonth() - start.getMonth())
+          const diffYears  = sel.getFullYear() - start.getFullYear()
+
+          switch(type) {
+            case 'daily':
+              return diffDays % interval === 0
+
+            case 'weekly':
+              // must be a chosen weekday _and_ fall on the right week
+              return daysOfWeek.includes(sel.getDay())
+                  && diffWeeks % interval === 0
+
+            case 'monthly':
+              // must be a chosen day-of-month _and_ on the right month
+              return daysOfMonth.includes(sel.getDate())
+                  && diffMonths % interval === 0
+
+            case 'yearly':
+              // must be the chosen month _and_ day, then check years
+              return monthsOfYear.includes(sel.getMonth())
+                  && sel.getDate() === dayOfMonth
+                  && diffYears % interval === 0
+
+            default:
+              return false
           }
-          // Monthly
-          if (freq.type === 'monthly' && freq.daysOfMonth && Array.isArray(freq.daysOfMonth)) {
-            return freq.daysOfMonth.includes(d.getDate());
-          }
-          // Yearly
-          if (freq.type === 'yearly' && freq.monthsOfYear && Array.isArray(freq.monthsOfYear)) {
-            return freq.monthsOfYear.includes(d.getMonth()+1) && freq.daysOfMonth && freq.daysOfMonth.includes(d.getDate());
-          }
-          // Custom - fallback to daily
-          return false;
-        }).map((habit, index) => (
+        })
+          .map((habit, index) => (
           <HabitItem
             key={habit.id}
             habit={habit}

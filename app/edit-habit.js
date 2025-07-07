@@ -359,6 +359,8 @@ export default function EditHabit() {
       };
 
       await updateHabit(habitId, updates);
+      const all = JSON.parse(await AsyncStorage.getItem('habits') || '[]');
+      setHabits(all);
       router.back();
     } catch (error) {
       console.error('Error updating habit:', error);
