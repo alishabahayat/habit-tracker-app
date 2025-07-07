@@ -434,7 +434,11 @@ export default function EditHabit() {
         <Text style={styles.headerTitle}>Edit <Text style={styles.headerAccent}>Habit</Text></Text>
       </View>
 
-      <View style={styles.centeredContent}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.centeredContent}
+        keyboardShouldPersistTaps="handled"  
+      >
         <View style={styles.whatRow}>
           <Text style={styles.label}>What?</Text>
           <TouchableOpacity
@@ -453,7 +457,7 @@ export default function EditHabit() {
         />
 
         {/* ── FREQUENCY PICKER ────────────── */}
-        <ScrollView style={styles.frequencyContainer}>
+        <View style={styles.frequencyContainer}>
           <Text style={styles.frequencyLabel}>Frequency Type</Text>
           <View style={styles.frequencyPicker}>
             {['daily','weekly','monthly','yearly'].map(type => (
@@ -661,7 +665,7 @@ export default function EditHabit() {
               </View>
             </>
           )}
-        </ScrollView>
+        </View>
 
 
         <View style={styles.startDateContainer}>
@@ -709,43 +713,43 @@ export default function EditHabit() {
             />
           )}
         />
+      </ScrollView>
 
-        <Modal
-          visible={showEmojiPicker}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setShowEmojiPicker(false)}
-        >
-          <View style={styles.pickerContainer}>
-            <View style={styles.pickerContent}>
-              <Text style={styles.pickerTitle}>Pick an emoji</Text>
-              <FlatList
-                data={EMOJIS}
-                keyExtractor={(e) => e}
-                numColumns={6}
-                contentContainerStyle={styles.pickerList}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.pickerItem}
-                    onPress={() => {
-                      setEmoji(item);
-                      setShowEmojiPicker(false);
-                    }}
-                  >
-                    <Text style={styles.pickerEmoji}>{item}</Text>
-                  </TouchableOpacity>
-                )}
-              />
-              <TouchableOpacity
-                style={styles.pickerClose}
-                onPress={() => setShowEmojiPicker(false)}
-              >
-                <Text style={styles.pickerCloseText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
+      <Modal
+        visible={showEmojiPicker}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowEmojiPicker(false)}
+      >
+        <View style={styles.pickerContainer}>
+          <View style={styles.pickerContent}>
+            <Text style={styles.pickerTitle}>Pick an emoji</Text>
+            <FlatList
+              data={EMOJIS}
+              keyExtractor={(e) => e}
+              numColumns={6}
+              contentContainerStyle={styles.pickerList}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.pickerItem}
+                  onPress={() => {
+                    setEmoji(item);
+                    setShowEmojiPicker(false);
+                  }}
+                >
+                  <Text style={styles.pickerEmoji}>{item}</Text>
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity
+              style={styles.pickerClose}
+              onPress={() => setShowEmojiPicker(false)}
+            >
+              <Text style={styles.pickerCloseText}>Cancel</Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
-      </View>
+        </View>
+      </Modal>
 
       <TouchableOpacity style={styles.addButton} onPress={handleSave}>
         <Text style={styles.addButtonText}>Save Changes</Text>

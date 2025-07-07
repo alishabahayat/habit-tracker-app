@@ -42,7 +42,7 @@ export default function Login() {
       <Text style={styles.title}>Welcome Back</Text>
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder="Username"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
