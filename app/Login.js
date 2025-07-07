@@ -57,9 +57,7 @@ export default function Login() {
         secureTextEntry
         placeholderTextColor="#666666"
       />
-      <TouchableOpacity style={styles.forgotPassword}>
-        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-      </TouchableOpacity>
+      
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, textAlign: 'center', width: '100%' }}>Sign In</Text>
       </TouchableOpacity>
@@ -106,14 +104,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  forgotPassword: {
-    alignItems: 'flex-end',
-    marginBottom: 20,
-  },
-  forgotPasswordText: {
-    color: '#333',
-    fontSize: 14,
-  },
+ 
   loginButton: {
     width: '100%',
     height: 50,
