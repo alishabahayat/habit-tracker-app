@@ -81,6 +81,11 @@ const styles = StyleSheet.create({
   headerAccent: {
     color: '#84AB66',
   },
+  headerTitleText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#F5F0EE',
+  },
   whatRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -333,18 +338,18 @@ export default function AddHabit() {
 
   // Log activity changes
   useEffect(() => {
-    console.log('Activity changed:', activity);
+    console.log('Habit changed:', activity);
   }, [activity]);
 
   const handleSave = async () => {
     if (!activity.trim()) {
-      Alert.alert('Error', 'Please enter an activity name');
+      Alert.alert('Error', 'Please enter a habit name');
       return;
     }
 
     try {
       console.log('Starting to add habit with userId:', userId);
-      console.log('Current activity:', activity);
+      console.log('Current habit:', activity);
       console.log('Selected emoji:', emoji);
       console.log('Selected color:', color);
       console.log('Selected frequency:', frequency);
@@ -400,7 +405,7 @@ export default function AddHabit() {
     if (activity.trim() !== '') {
       Alert.alert(
         'Unsaved Changes',
-        'Would you like to save your activity before leaving?',
+        'Would you like to save your habit before leaving?',
         [
           {
             text: 'Cancel',
@@ -435,7 +440,7 @@ export default function AddHabit() {
           <TouchableOpacity onPress={handleBack}>
             <Image source={X_BUTTON} style={styles.xButton} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Create <Text style={styles.headerAccent}>Activity</Text></Text>
+          <Text style={styles.headerTitle}>Create <Text style={styles.headerAccent}>Habit</Text></Text>
         </View>
         <View style={styles.centeredContent}>
           <View style={styles.whatRow}>

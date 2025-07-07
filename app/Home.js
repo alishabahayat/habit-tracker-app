@@ -525,10 +525,23 @@ export default function Home() {
       {/* Habits List (Scrollable) */}
       <ScrollView style={styles.habitsScroll} contentContainerStyle={styles.habitsContainer}>
         {habits.filter(habit => {
+          // Check if habit has started
+          const start = new Date(habit.start_date);
+          start.setHours(0,0,0,0);
+
+          const sel = new Date(selectedDate);
+          sel.setHours(0,0,0,0);
+
+          // now compare just the dates
+          if (sel < start) {
+            return false;
+          }
+          
           // Default to showing if no frequency set
           if (!habit.frequency || !habit.frequency.type) return true;
           const freq = habit.frequency;
           const d = selectedDate;
+          
           // Daily
           if (freq.type === 'daily') return true;
           // Weekly

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState, useContext } from 'react';
+import { useRouter } from 'expo-router';
+import { useContext, useState } from 'react';
 import {
   Alert,
   Image,
@@ -11,7 +12,6 @@ import {
 } from 'react-native';
 import { AuthContext } from './_contexts/AuthContext';
 import { createUser } from './_helpers/database';
-import { useRouter } from 'expo-router';
 
 
 // assets
@@ -72,7 +72,7 @@ export default function SignUp() {
         />
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder="Username"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
