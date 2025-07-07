@@ -603,67 +603,72 @@ export default function AddHabit() {
                 </View>
               </>
             )}
-            {frequency.type === 'yearly' && (
-              <>
-                <View style={styles.frequencyContainerInline}>
-                  <Text style={styles.frequencyLabel}>Every</Text>
-                  <TextInput
-                    style={styles.frequencyInput}
-                    value={frequency.interval.toString()}
-                    onChangeText={(value) => {
-                      const num = parseInt(value);
-                      if (!isNaN(num) && num > 0) {
-                        setFrequency(prev => ({ ...prev, interval: num }));
-                      }
-                    }}
-                    keyboardType="numeric"
-                    placeholder="1"
-                  />
-                  <Text style={styles.frequencyLabel}>year(s)</Text>
-                </View>
-                <Text style={styles.frequencyLabel}>Select month:</Text>
-                <View style={styles.monthPicker}>
-                  {['January', 'February', 'March', 'April', 'May', 'June',
-                    'July', 'August', 'September', 'October', 'November', 'December'].map((month, index) => (
-                    <TouchableOpacity
-                      key={month}
-                      style={[
-                        styles.monthPickerItem,
-                        frequency.monthsOfYear.includes(index) && styles.selectedDayButton
-                      ]}
-                      onPress={() => {
-                        setFrequency(prev => ({
-                          ...prev,
-                          monthsOfYear: prev.monthsOfYear.includes(index)
-                            ? prev.monthsOfYear.filter(m => m !== index)
-                            : [...prev.monthsOfYear, index]
-                        }));
-                      }}
-                    >
-                      <Text style={[
-                        styles.dayButtonText,
-                        frequency.monthsOfYear.includes(index) && styles.selectedDayButtonText
-                      ]}>
-                        {month}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                <Text style={styles.frequencyLabel}>Select day of the month:</Text>
-                <TextInput
-                  style={styles.frequencyInput}
-                  value={frequency.dayOfMonth ? frequency.dayOfMonth.toString() : ''}
-                  onChangeText={(value) => {
-                    const num = parseInt(value);
-                    if (!isNaN(num) && num >= 1 && num <= 31) {
-                      setFrequency(prev => ({ ...prev, dayOfMonth: num }));
-                    }
-                  }}
-                  keyboardType="numeric"
-                  placeholder="1"
-                />
-              </>
-            )}
+            {/* Yearly */}
+                      {frequency.type === 'yearly' && (
+                        <>
+                          <View style={styles.frequencyContainerInline}>
+                            <Text style={styles.frequencyLabel}>Every</Text>
+                            <TextInput
+                              style={styles.frequencyInput}
+                              value={String(frequency.interval)}
+                              onChangeText={v => {
+                                const n = parseInt(v);
+                                if (!isNaN(n) && n > 0) setFrequency(p => ({ ...p, interval: n }));
+                              }}
+                              keyboardType="numeric"
+                              placeholder="1"
+                            />
+                            <Text style={styles.frequencyLabel}>year(s)</Text>
+                          </View>
+                          <Text style={styles.frequencyLabel}>Select month:</Text>
+                          <View style={styles.monthPicker}>
+                            {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, idx) => (
+                              <TouchableOpacity
+                                key={m}
+                                style={[
+                                  styles.dayButton,
+                                  frequency.monthsOfYear.includes(idx) && styles.selectedDayButton
+                                ]}
+                                onPress={() => {
+                                  setFrequency(p => ({
+                                    ...p,
+                                    monthsOfYear: p.monthsOfYear.includes(idx)
+                                      ? p.monthsOfYear.filter(x => x !== idx)
+                                      : [...p.monthsOfYear, idx]
+                                  }));
+                                }}
+                              >
+                                <Text style={[
+                                  styles.dayButtonText,
+                                  frequency.monthsOfYear.includes(idx) && styles.selectedDayButtonText
+                                ]}>
+                                  {m}
+                                </Text>
+                              </TouchableOpacity>
+                            ))}
+                          </View>
+                          <Text style={styles.frequencyLabel}>Select day of the month:</Text>
+                          <View style={styles.daysOfWeekContainer}>
+                            {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                              <TouchableOpacity
+                                key={day}
+                                style={[
+                                  styles.dayButton,
+                                  frequency.dayOfMonth === day && styles.selectedDayButton
+                                ]}
+                                onPress={() => setFrequency(p => ({ ...p, dayOfMonth: day }))}
+                              >
+                                <Text style={[
+                                  styles.dayButtonText,
+                                  frequency.dayOfMonth === day && styles.selectedDayButtonText
+                                ]}>
+                                  {day}
+                                </Text>
+                              </TouchableOpacity>
+                            ))}
+                          </View>
+                        </>
+                      )}
           </View>
           {/* ── START DATE PICKER ───────────── */}
           <View style={styles.startDateContainer}>
