@@ -83,7 +83,12 @@ useFocusEffect(
     <View style={styles.habitRow}>
       <Text style={styles.habitTitle}>{item.emoji} {item.name}</Text>
       <View style={styles.streakInfoRow}>
-        <Text style={[styles.streakText, { color: '#84AB66' }]}>Current: {item.currentStreak}d</Text>
+      {item.currentStreak > 0 && (
+  <Text style={[styles.streakText, { color: '#84AB66' }]}>
+    Current: {item.currentStreak}d
+  </Text>
+)}
+
         <Text style={styles.streakText}>Longest: {item.longestStreak}d</Text>
       </View>
       <StreakBar current={item.currentStreak} longest={item.longestStreak} />
