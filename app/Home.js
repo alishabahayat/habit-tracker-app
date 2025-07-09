@@ -461,11 +461,12 @@ export default function Home() {
     }
   }, [authContext.user, userId]);
 
-  const goToday = () => setCurrentDate(new Date());
-  const goToDate = (date) => {
-    setCurrentDate(date);
-    setSelectedDate(date);
+  const goToday = () => {
+    const today = new Date();
+    setCurrentDate(() => today);
+    setSelectedDate(() => today);
   };
+  
 
   const goPrevDay = () =>
     setCurrentDate(d =>
@@ -477,11 +478,12 @@ export default function Home() {
       new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)
     );
 
-  const days = Array.from({ length: 7 }).map((_, i) => {
-    const d = new Date(currentDate);
-    d.setDate(d.getDate() + (i - 3));
-    return d;
-  });
+    const days = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date(selectedDate);
+      d.setDate(d.getDate() + (i - 3));
+      return d;
+    });
+    
 
   return (
     <View style={styles.container}>
@@ -539,7 +541,11 @@ export default function Home() {
                 <TouchableOpacity 
                   key={idx} 
                   style={styles.dayBox} 
-                  onPress={() => goToDate(d)}
+                  onPress={() => {
+                    setSelectedDate(d);
+                    setCurrentDate(d); // <- Ensure calendar scroll syncs correctly
+                  }}
+                  
                 >
                   <View style={
                     selectedDate.toDateString() === d.toDateString() 
