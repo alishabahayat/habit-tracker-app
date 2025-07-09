@@ -1,3 +1,4 @@
+//streaks.js
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useContext, useState } from 'react';
 import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
