@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     color: '#4A4A4A',
     textAlign: 'center',
     marginTop: 20,
-    transform: [{ translateY: 45 }],
+    transform: [{ translateY: 20 }],
   },
   dayScroller: {
     flexDirection: 'row',
@@ -513,19 +513,20 @@ export default function Home() {
       </View>
 
       <Text style={styles.greeting}>Hello{user?.name ? `, ${user.name}` : ''}!</Text>
-      <TouchableOpacity
-  onPress={() => router.push('AllHabits')}
-  style={{
-    backgroundColor: '#A36C44',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    alignSelf: 'center',
-    marginTop: 10,
-  }}
->
-  <Text style={{ color: '#F2E8DA', fontWeight: 'bold' }}>View All Habits</Text>
-</TouchableOpacity>
+      <View style={{ alignItems: 'center', marginTop: 8 }}>
+  <TouchableOpacity
+    onPress={() => router.push('AllHabits')}
+    style={{
+      backgroundColor: '#73876ABF',
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 12,
+      marginTop: 8,
+    }}
+  >
+    <Text style={{ color: '#F2E8DA', fontWeight: 'bold' }}>View All Habits</Text>
+  </TouchableOpacity>
+</View>
 
       {/* 7-Day Scroller (Fixed) */}
       <View style={styles.dayScrollerWrapper}>
