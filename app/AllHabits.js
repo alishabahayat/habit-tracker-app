@@ -1,10 +1,8 @@
 // app/AllHabits.js
-import { useContext, useEffect, useState } from 'react';
-import { View, ScrollView, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { HabitsContext } from './_contexts/HabitsContext';
 import { useRouter } from 'expo-router';
-
-import { isHabitCompleted } from './_helpers/completions';
+import { useContext } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { HabitsContext } from './_contexts/HabitsContext';
 
 function HabitItem({ habit, onEdit }) {
   return (
@@ -35,7 +33,16 @@ export default function AllHabits() {
 
   return (
     <View style={styles.container}>
+      {/* Back to Home Button */}
+      <TouchableOpacity
+        onPress={() => router.replace('/Home')}
+        style={styles.backButton}
+      >
+        <Text style={styles.backButtonText}>← Back to Home</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>All Habits</Text>
+
       <ScrollView contentContainerStyle={styles.scroll}>
         {habits.map(habit => (
           <HabitItem
@@ -65,6 +72,19 @@ const styles = StyleSheet.create({
     color: '#4A4A4A',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  backButton: {
+    backgroundColor: '#718278',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginBottom: 15,
+  },
+  backButtonText: {
+    color: '#F2E8DA',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   habitItem: {
     flexDirection: 'row',
