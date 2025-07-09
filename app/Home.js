@@ -513,6 +513,19 @@ export default function Home() {
       </View>
 
       <Text style={styles.greeting}>Hello{user?.name ? `, ${user.name}` : ''}!</Text>
+      <TouchableOpacity
+  onPress={() => router.push('AllHabits')}
+  style={{
+    backgroundColor: '#A36C44',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignSelf: 'center',
+    marginTop: 10,
+  }}
+>
+  <Text style={{ color: '#F2E8DA', fontWeight: 'bold' }}>View All Habits</Text>
+</TouchableOpacity>
 
       {/* 7-Day Scroller (Fixed) */}
       <View style={styles.dayScrollerWrapper}>
@@ -546,8 +559,51 @@ export default function Home() {
 
       {/* Habits List (Scrollable) */}
       <ScrollView style={styles.habitsScroll} contentContainerStyle={styles.habitsContainer}>
-      {habits.map((habit, index) => (
+        {habits.filter(habit => {
+          // Check if habit has started
+          const start = new Date(habit.start_date);
+          start.setHours(0,0,0,0);
 
+          const sel = new Date(selectedDate);
+          sel.setHours(0,0,0,0);
+
+          // now compare just the dates
+          if (sel < start) {
+            return false;
+          }
+          
+          const { type, interval, daysOfWeek, daysOfMonth, monthsOfYear, dayOfMonth } = habit.frequency || {}
+          const diffMs = sel - start
+          const diffDays = Math.floor(diffMs / (1000*60*60*24))
+          const diffWeeks = Math.floor(diffDays / 7)
+          const diffMonths = (sel.getFullYear() - start.getFullYear()) * 12 + (sel.getMonth() - start.getMonth())
+          const diffYears  = sel.getFullYear() - start.getFullYear()
+
+          switch(type) {
+            case 'daily':
+              return diffDays % interval === 0
+
+            case 'weekly':
+              // must be a chosen weekday _and_ fall on the right week
+              return daysOfWeek.includes(sel.getDay())
+                  && diffWeeks % interval === 0
+
+            case 'monthly':
+              // must be a chosen day-of-month _and_ on the right month
+              return daysOfMonth.includes(sel.getDate())
+                  && diffMonths % interval === 0
+
+            case 'yearly':
+              // must be the chosen month _and_ day, then check years
+              return monthsOfYear.includes(sel.getMonth())
+                  && sel.getDate() === dayOfMonth
+                  && diffYears % interval === 0
+
+            default:
+              return false
+          }
+        })
+          .map((habit, index) => (
           <HabitItem
             key={habit.id}
             habit={habit}
@@ -556,7 +612,31 @@ export default function Home() {
             refreshHabits={fetchHabits}
           />
         ))}
-        
+        {habits.filter(habit => {
+          // Default to showing if no frequency set
+          if (!habit.frequency || !habit.frequency.type) return true;
+          const freq = habit.frequency;
+          const d = selectedDate;
+          // Daily
+          if (freq.type === 'daily') return true;
+          // Weekly
+          if (freq.type === 'weekly' && freq.daysOfWeek && Array.isArray(freq.daysOfWeek)) {
+            // JS: Sunday=0, ..., Saturday=6
+            return freq.daysOfWeek.includes(d.getDay());
+          }
+          // Monthly
+          if (freq.type === 'monthly' && freq.daysOfMonth && Array.isArray(freq.daysOfMonth)) {
+            return freq.daysOfMonth.includes(d.getDate());
+          }
+          // Yearly
+          if (freq.type === 'yearly' && freq.monthsOfYear && Array.isArray(freq.monthsOfYear)) {
+            return freq.monthsOfYear.includes(d.getMonth()+1) && freq.daysOfMonth && freq.daysOfMonth.includes(d.getDate());
+          }
+          // Custom - fallback to daily
+          return false;
+        }).length === 0 && (
+          <Text style={{ color: '#888', textAlign: 'center', marginTop: 30 }}>No habits scheduled for this day.</Text>
+        )}
       </ScrollView>
 
       {/* Add Event Button */}
