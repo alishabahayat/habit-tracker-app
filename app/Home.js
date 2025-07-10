@@ -396,52 +396,7 @@ export default function Home() {
     loadUserId();
   }, []);
 
-  //const [habits, setHabits] = useState([]);
-  // Removed completedHabits state; use isHabitCompleted for UI
-
-  // Helper to format date as YYYY-MM-DD
-  //const getDateKey = (date) => date.toISOString().split('T')[0];
-
-  // Removed per-user completedHabits storage and persistence logic. Use global helpers instead.
-  //const [selectedDate, setSelectedDate] = useState(new Date());
-  //const [currentDate, setCurrentDate] = useState(new Date());
-
-  /*useEffect(() => {
-    if (userId) {
-      fetchHabits();
-    }
-  }, [userId]);*/
-
-  /*const fetchHabits = async () => {
-    try {
-      console.log('Starting to fetch habits');
-      console.log('Current userId:', userId);
-      
-      // Get all habits
-      const allHabitsString = await AsyncStorage.getItem('habits');
-      console.log('Raw habits string:', allHabitsString);
-      
-      if (!allHabitsString) {
-        console.log('No habits found in storage');
-        setHabits([]);
-        return;
-      }
-      
-      const allHabits = JSON.parse(allHabitsString);
-      console.log('Parsed habits:', allHabits);
-      
-      // Filter habits for current user
-      const userHabits = allHabits.filter(h => h.user_id === userId);
-      console.log('Filtered habits:', userHabits);
-      
-      setHabits(userHabits);
-      console.log('Habits state updated successfully');
-    } catch (error) {
-      console.error('Error fetching habits:', error);
-      console.error('Error details:', error.message);
-      setHabits([]); // Clear habits on error
-    }
-  };*/
+  
   async function fetchHabits() {
   try {
     const raw   = await AsyncStorage.getItem('habits');
