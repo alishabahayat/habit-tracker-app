@@ -1,3 +1,4 @@
+//app/SignUp.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useContext, useState } from 'react';

@@ -506,8 +506,7 @@ export default function Home() {
         <View style={styles.calendarContainer}>
         <TouchableOpacity style={[styles.createBtn, { backgroundColor: '#718278' }]} onPress={() => router.push('add-habit')}>
   <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
-    <Text style={{ color: '#C8C8C8' }}>Create </Text>
-    <Text style={{ color: '#A36C44' }}>Habit</Text>
+    <Text style={{ color: '#C8C8C8' }}>Create Habit </Text>
   </Text>
 </TouchableOpacity>
 

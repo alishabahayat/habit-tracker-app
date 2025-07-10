@@ -1,5 +1,4 @@
-// app/database.js
-import SQLite from 'react-native-sqlite-storage';
+// app/_helpers/database.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Platform-specific database
@@ -76,52 +75,26 @@ export const initializeDatabase = async () => {
  * @param {string} password
  * @returns Promise resolving to the new user's insertId
  */
-export const createUser = async (name, email, password) => {
-  try {
-    const lowerCaseEmail = email.toLowerCase();
-    if (typeof window !== 'undefined') {
-      // Web platform - use AsyncStorage
-      const usersString = await AsyncStorage.getItem('users') || '[]';
-      const users = JSON.parse(usersString);
-      const existingUser = users.find(u => u.email.toLowerCase() === lowerCaseEmail);
-      
-      if (existingUser) {
-        throw new Error('User already exists');
-      }
+export async function createUser(name, email, password) {
+  const key = 'users';
+  const raw = await AsyncStorage.getItem(key) || '[]';
+  const users = JSON.parse(raw);
 
-      const newUser = {
-        id: Date.now().toString(),
-        name,
-        email: lowerCaseEmail,
-        password
-      };
-      
-      users.push(newUser);
-      await AsyncStorage.setItem('users', JSON.stringify(users));
-      
-      return { insertId: newUser.id };
-    } else {
-      // Mobile platform - use SQLite
-      await database.transaction((tx) => {
-        tx.executeSql(
-          'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-          [name, lowerCaseEmail, password],
-          (_, result) => {
-            console.log('User created successfully:', result);
-            return { insertId: result.insertId };
-          },
-          (error) => {
-            console.error('Error creating user:', error);
-            throw error;
-          }
-        );
-      });
-    }
-  } catch (error) {
-    console.error('Error in createUser:', error);
-    throw error;
+  const lc = email.toLowerCase();
+  if (users.some(u => u.email.toLowerCase() === lc)) {
+    throw new Error('User already exists');
   }
-};
+
+  const newUser = {
+    id: Date.now().toString(),
+    name,
+    email: lc,
+    password
+  };
+  users.push(newUser);
+  await AsyncStorage.setItem(key, JSON.stringify(users));
+  return { insertId: newUser.id };
+}
 
 /**
  * Get a user by email and password.

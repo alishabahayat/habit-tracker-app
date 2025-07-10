@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createContext, useEffect, useState } from 'react';
 
 // Initialize AsyncStorage
 const initializeStorage = async () => {
@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }) => {
 
   // Auth functions
   const signIn = async (email, password) => {
+    email = email.toLowerCase().trim();
     try {
       const usersString = await AsyncStorage.getItem('users') || '[]';
       const users = JSON.parse(usersString);
@@ -63,6 +64,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signUp = async (email, password, name) => {
+     email = email.toLowerCase().trim();
     try {
       const usersString = await AsyncStorage.getItem('users') || '[]';
       const users = JSON.parse(usersString);
