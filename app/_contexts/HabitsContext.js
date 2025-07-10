@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useEffect, useState } from 'react';
 
-export const HabitsContext = createContext();
+const HabitsContext = createContext();
+export { HabitsContext };
 
 export const HabitsProvider = ({ children }) => {
   const [habits, setHabits] = useState([]);

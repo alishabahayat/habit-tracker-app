@@ -157,7 +157,8 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '700',
     lineHeight: 24,
-    transform: [{ translateY: 50 }],
+    marginTop: 60,
+    marginBottom: -50, 
   },
 
   calendarContainer: {
@@ -186,8 +187,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#4A4A4A',
     textAlign: 'center',
-    marginTop: 20,
-    transform: [{ translateY: 20 }],
+    marginTop: 35,
+    //transform: [{ translateY: 20 }],
   },
   dayScroller: {
     flexDirection: 'row',

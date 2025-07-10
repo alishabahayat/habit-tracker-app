@@ -16,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import { AuthContext } from './_contexts/AuthContext';
+import { HabitsContext } from './_contexts/HabitsContext';
 
 // assets
 const X_BUTTON = require('../assets/images/X Button.png');
@@ -314,6 +315,7 @@ const styles = StyleSheet.create({
 export default function AddHabit() {
   const router = useRouter();
   const authContext = useContext(AuthContext);
+  const habitsContext = useContext(HabitsContext);
   const { id: userId } = authContext.user || {};
 
   const [activity, setActivity] = useState('');
@@ -386,13 +388,10 @@ export default function AddHabit() {
       await AsyncStorage.setItem('habits', JSON.stringify(existingHabits));
       console.log('Habits saved to storage successfully');
 
-      // Update HabitsContext if available
-      if (typeof window !== 'undefined') {
-        // Web: find global context
-        const globalCtx = window.__REACT_DEVTOOLS_GLOBAL_HOOK__ && window.__REACT_DEVTOOLS_GLOBAL_HOOK__.reactDevtoolsAgent;
-        if (globalCtx && globalCtx.setHabits) globalCtx.setHabits(existingHabits);
+      // Update HabitsContext
+      if (habitsContext && habitsContext.setHabits) {
+        habitsContext.setHabits(existingHabits);
       }
-      if (typeof setHabits === 'function') setHabits(existingHabits);
 
       router.back();
     } catch (error) {

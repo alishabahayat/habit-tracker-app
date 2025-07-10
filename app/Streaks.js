@@ -4,6 +4,7 @@ import { useCallback, useContext, useState, useEffect } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -26,17 +27,25 @@ function StreakBar({ current, longest }) {
 
 export default function Streaks() {
   const router = useRouter();
-  const { habits } = useContext(HabitsContext);
-  const { user }   = useContext(AuthContext);
+  const habitsContext = useContext(HabitsContext);
+  const authContext = useContext(AuthContext);
   const [habitStreaks, setHabitStreaks] = useState([]);
   const [loading, setLoading]           = useState(true);
 
   // Debug logging
   useEffect(() => {
     console.log('Streaks page mounted');
-    console.log('User:', user);
-    console.log('Habits:', habits);
+    console.log('Auth Context:', authContext);
+    console.log('Habits Context:', habitsContext);
   }, []);
+
+  // Early return if contexts are not available
+  if (!habitsContext || !authContext) {
+    return null;
+  }
+
+  const { habits } = habitsContext;
+  const { user } = authContext;
 
   // Load streak data on focus — no setState in render!
   useFocusEffect(
@@ -150,7 +159,10 @@ export default function Streaks() {
         onPress={() => router.replace('/Home')}
         hitSlop={{ top:16, bottom:16, left:16, right:16 }}
       >
-        <Text style={styles.closeText}>×</Text>
+        <Image
+          source={require('../assets/images/X Button.png')}
+          style={{ width: 32, height: 32 }}
+        />
       </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -230,13 +242,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
-  },
-  closeText: {
-    fontSize: 44,
-    fontWeight: 'bold',
-    color: '#718278',
-    lineHeight: 52,
-    textAlign: 'center',
   },
   card: {
     backgroundColor: '#F8F8F8',

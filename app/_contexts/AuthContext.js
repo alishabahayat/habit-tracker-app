@@ -17,8 +17,7 @@ const initializeStorage = async () => {
 initializeStorage();
 
 const AuthContext = createContext();
-
-export const AuthProvider = ({ children }) => {
+const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   // Initialize user state from AsyncStorage
@@ -107,7 +106,5 @@ export const AuthProvider = ({ children }) => {
 
 
 
-export { AuthContext };
-
-// Default export for Expo Router
-export default AuthProvider;
+// Export context and provider
+export { AuthContext, AuthProvider };
